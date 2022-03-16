@@ -1,15 +1,23 @@
-//import java_cup.runtime.*
+import java_cup.runtime.*
 
 %%
 
 %public 
 %line 
 %column
-%standalone
-//%cup
+//%standalone
+%cup
 
 %{
   StringBuilder string = new StringBuilder();    
+
+  private Symbol symbol(int type) {
+    return new Symbol(type, yyline+1, yycolumn+1);
+  }
+
+  private Symbol symbol(int type, Object value) {
+    return new Symbol(type, yyline+1, yycolumn+1, value);
+  }
 %}
 
 /* main character classes */
@@ -48,41 +56,46 @@ SingleCharacter = [^\r\n\'\\]
 <YYINITIAL> {
 
     /* imports */
-    "import"                    {}
+    "import"                    {return symbol(sym.IMPORT);}
     /* visibility */
-    "private"                   {}
-    "public"                    {}
-    "protected"                 {}
-    "final"                     {}
+    "private"                   { return symbol(sym.PRIVATE);}
+    "public"                    { return symbol(sym.PUBLIC);}
+    "protected"                 { return symbol(sym.PROTECTED);}
+    "final"                     { return symbol(sym.FINAL);}
 
-    "void"                         { return symbol(VOID); }
-    "static"                       { return symbol(STATIC); }
+    "void"                         { return symbol(sym.VOID); }
+    "static"                       { return symbol(sym.STATIC); }
     /* data types */
-    "int"                       {}
-    "boolean"                   {}
-    "String"                    {}
-    "char"                      {}
-    "double"                    {}
-    "Object"                    {} //Dudas}
+    "int"                       { return symbol(sym.INT);}
+    "boolean"                   { return symbol(sym.BOOLEAN);}
+    "String"                    { return symbol(sym.STRING);}
+    "char"                      { return symbol(sym.CHAR);}
+    "double"                    { return symbol(sym.DOUBLE);}
+    //"Object"                    { return symbol(sym.);} //Dudas}
 
     /* Control statements */
-    "if"                        {}
-    "else"                      {}
-    "for"                       {}
-    "do"                        {}
-    "while"                     {}
-    "switch"                    {}
+    "if"                        { return symbol(sym.IF);}
+    "else"                      { return symbol(sym.ELSE);}
+    "for"                       { return symbol(sym.FOR);}
+    "do"                        { return symbol(sym.DO);}
+    "while"                     { return symbol(sym.WHILE);}
+    "switch"                    { return symbol(sym.SWITCH);}
+    "case"                      { return symbol(sym.CASE); }
+    "default"                   { return symbol(sym.DEFAULT); }
  
     /* output statement */
-    "break"                     {}
-    "return"                    {}
+    "break"                     { return symbol(sym.BREAK);}
+    "return"                    { return symbol(sym.RETURN);}
     /* boolean literals */
-    "true"                      { return symbol(sym.BOOLEAN_LITERAL); }
-    "false"                     { return symbol(sym.BOOLEAN_LITERAL); }
+    "true"                      { return symbol(sym.BOOLEAN_LITERAL);}
+    "false"                     { return symbol(sym.BOOLEAN_LITERAL);}
   
     /* null literal */
-    "null"                      { return symbol(sym.NULL_LITERAL); }
-  
+    "null"                      { return symbol(sym.NULL_LITERAL);}
+    /* POO */
+    "this"                      { return symbol(sym.THIS);}
+    "super"                     { return symbol(sym.SUPER);}    
+    "new"                       { return symbol(sym.NEW);}
   
     /* grouping */
     "("                         { return symbol(sym.LPAREN); }
@@ -98,12 +111,13 @@ SingleCharacter = [^\r\n\'\\]
     ":"                         { return symbol(sym.COLON); }
   
     /* operators */
-    "="                         { return symbol(sym.EQ); }
-    "+="                        { return symbol(sym.PLUSEQ); }
-    "-="                        { return symbol(sym.MINUSEQ); }
-    "*="                        { return symbol(sym.MULTEQ); }
-    "/="                        { return symbol(sym.DIVEQ); }     
-    "%="                        { return symbol(sym.MODEQ); }
+    "="                         { return symbol(sym.EQ);}
+    "+="                        { return symbol(sym.PLUSEQ);}
+    "-="                        { return symbol(sym.MINUSEQ);}
+    "*="                        { return symbol(sym.MULTEQ);}
+    "/="                        { return symbol(sym.DIVEQ);}     
+    "%="                        { return symbol(sym.MODEQ);}
+    "%"                         { return symbol(sym.MOD);}
 
     ">"                         { return symbol(sym.GT); }
     "<"                         { return symbol(sym.LT); }
