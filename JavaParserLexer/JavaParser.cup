@@ -148,7 +148,6 @@ non terminal postfix_expression;
 non terminal postincrement_expression, postdecrement_expression;
 non terminal unary_expression, unary_expression_not_plus_minus;
 non terminal preincrement_expression, predecrement_expression;
-non terminal cast_expression;
 non terminal multiplicative_expression, additive_expression;
 non terminal shift_expression, relational_expression, equality_expression;
 non terminal and_expression, exclusive_or_expression, inclusive_or_expression;
@@ -548,12 +547,9 @@ predecrement_expression ::=
 	;
 unary_expression_not_plus_minus ::=
 		postfix_expression	
-	|	NOT unary_expression
-	|	cast_expression
+	|	NOT unary_expression	
 	;
-cast_expression ::=		
-		LPAREN expression RPAREN unary_expression_not_plus_minus	
-	;
+
 multiplicative_expression ::=
 		unary_expression
 	|	multiplicative_expression MULT unary_expression
