@@ -108,8 +108,8 @@ non terminal method_declaration, method_header, method_declarator;
 non terminal formal_parameter_list_opt, formal_parameter_list;
 non terminal formal_parameter;
 non terminal class_type_list, method_body;
-// 19.8.4) Static Initializers
-non terminal static_initializer;
+
+
 // 19.8.5) Constructor Declarations
 non terminal constructor_declaration, constructor_declarator;
 non terminal constructor_body;
@@ -123,7 +123,6 @@ non terminal local_variable_declaration_statement, local_variable_declaration;
 non terminal statement, statement_no_short_if;
 non terminal statement_without_trailing_substatement;
 non terminal empty_statement;
-non terminal labeled_statement, labeled_statement_no_short_if;
 non terminal expression_statement, statement_expression;
 non terminal if_then_statement;
 non terminal if_then_else_statement, if_then_else_statement_no_short_if;
@@ -140,14 +139,11 @@ non terminal statement_expression_list;
 non terminal identifier_opt;
 non terminal break_statement;
 non terminal return_statement;
-non terminal synchronized_statement;
-// 19.12) Expressions
+//Expressions
 non terminal primary, primary_no_new_array;
 non terminal class_instance_creation_expression;
 non terminal argument_list_opt, argument_list;
-non terminal array_creation_expression;
-non terminal dim_exprs, dim_expr, dims_opt, dims;
-non terminal field_access, method_invocation, array_access;
+non terminal field_access, method_invocation;
 non terminal postfix_expression;
 non terminal postincrement_expression, postdecrement_expression;
 non terminal unary_expression, unary_expression_not_plus_minus;
@@ -271,8 +267,7 @@ class_body_declarations ::=
 	|	class_body_declarations class_body_declaration
 	;
 class_body_declaration ::=
-		class_member_declaration
-	|	static_initializer
+		class_member_declaration	
 	|	constructor_declaration
 	|	block
 	;
@@ -332,11 +327,6 @@ method_body ::=	block
 	|	SEMICOLON
 	;
 
-// Static Initializers
-static_initializer ::=
-		STATIC block
-	;
-
 //Constructor Declarations
 constructor_declaration ::=
 		modifiers_opt constructor_declarator 
@@ -379,19 +369,16 @@ local_variable_declaration_statement ::=
 		local_variable_declaration SEMICOLON
 	;
 local_variable_declaration ::=
-		type variable_declarators
-	|	FINAL type variable_declarators
+		type variable_declarators	
 	;
-statement ::=	statement_without_trailing_substatement
-	|	labeled_statement
+statement ::=	statement_without_trailing_substatement	
 	|	if_then_statement
 	|	if_then_else_statement
 	|	while_statement
 	|	for_statement
 	;
 statement_no_short_if ::=
-		statement_without_trailing_substatement
-	|	labeled_statement_no_short_if
+		statement_without_trailing_substatement	
 	|	if_then_else_statement_no_short_if
 	|	while_statement_no_short_if
 	|	for_statement_no_short_if
@@ -403,17 +390,10 @@ statement_without_trailing_substatement ::=
 	|	switch_statement
 	|	do_statement
 	|	break_statement	
-	|	return_statement
-	|	synchronized_statement	
+	|	return_statement	
 	;
 empty_statement ::=
 		SEMICOLON
-	;
-labeled_statement ::=
-		IDENTIFIER COLON statement
-	;
-labeled_statement_no_short_if ::=
-		IDENTIFIER COLON statement_no_short_if
 	;
 expression_statement ::=
 		statement_expression SEMICOLON
@@ -507,13 +487,9 @@ break_statement ::=
 return_statement ::=
 		RETURN expression_opt SEMICOLON
 	;
-synchronized_statement ::=
-		SYNCHRONIZED LPAREN expression RPAREN block
-	;
 
 //Expressions
-primary ::=	primary_no_new_array
-	|	array_creation_expression
+primary ::=	primary_no_new_array	
 	;
 primary_no_new_array ::=
 		literal
@@ -521,20 +497,10 @@ primary_no_new_array ::=
 	|	LPAREN expression RPAREN
 	|	class_instance_creation_expression
 	|	field_access
-	|	method_invocation
-	|	array_access
-	|	primitive_type DOT CLASS
-	|	VOID DOT CLASS	
-	|	name DOT CLASS
-	|	name DOT THIS
+	|	method_invocation					
 	;
 class_instance_creation_expression ::=
-		NEW class_type LPAREN argument_list_opt RPAREN
-	|	NEW class_type LPAREN argument_list_opt RPAREN class_body
-	|	primary DOT NEW IDENTIFIER
-			LPAREN argument_list_opt RPAREN
-	|	primary DOT NEW IDENTIFIER
-			LPAREN argument_list_opt RPAREN class_body
+		NEW class_type LPAREN argument_list_opt RPAREN		
 	;
 argument_list_opt ::=
 	|	argument_list
@@ -542,23 +508,6 @@ argument_list_opt ::=
 argument_list ::=
 		expression
 	|	argument_list COMMA expression
-	;
-array_creation_expression ::=
-		NEW primitive_type dim_exprs dims_opt
-	|	NEW class_type dim_exprs dims_opt
-	|	NEW primitive_type dims array_initializer
-	|	NEW class_type dims array_initializer
-	;
-dim_exprs ::=	dim_expr
-	|	dim_exprs dim_expr
-	;
-dim_expr ::=	LBRACK expression RBRACK
-	;
-dims_opt ::=
-	|	dims
-	;
-dims ::=	LBRACK RBRACK
-	|	dims LBRACK RBRACK
 	;
 field_access ::=
 		primary DOT IDENTIFIER
@@ -571,10 +520,7 @@ method_invocation ::=
 	|	SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
 	|	name DOT SUPER DOT IDENTIFIER LPAREN argument_list_opt RPAREN
 	;
-array_access ::=
-		name LBRACK expression RBRACK
-	|	primary_no_new_array LBRACK expression RBRACK
-	;
+
 postfix_expression ::=
 		primary
 	|	name
@@ -605,10 +551,8 @@ unary_expression_not_plus_minus ::=
 	|	NOT unary_expression
 	|	cast_expression
 	;
-cast_expression ::=
-		LPAREN primitive_type dims_opt RPAREN unary_expression
-	|	LPAREN expression RPAREN unary_expression_not_plus_minus
-	|	LPAREN name dims RPAREN unary_expression_not_plus_minus
+cast_expression ::=		
+		LPAREN expression RPAREN unary_expression_not_plus_minus	
 	;
 multiplicative_expression ::=
 		unary_expression
