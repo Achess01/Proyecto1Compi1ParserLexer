@@ -1,7 +1,8 @@
-import java_cup.runtime.*
+package com.achess.project1testcompi;
+import java_cup.runtime.*;
 
 %%
-
+%class JavaLexer
 %public 
 %line 
 %column
@@ -27,8 +28,7 @@ InputCharacter = [^\r\n]
 WhiteSpace = {LineTerminator} | [ \t\f]
 
 /* comments */
-Comment = {TraditionalComment} | {EndOfLineComment} | 
-          {DocumentationComment}
+Comment = {TraditionalComment} | {EndOfLineComment}           
 
 TraditionalComment = "/*" [^*] ~"*/" | "/*" "*"+ "/"
 EndOfLineComment = "//" {InputCharacter}* {LineTerminator}?
@@ -147,7 +147,7 @@ SingleCharacter = [^\r\n\'\\]
   \'                             { yybegin(CHARLITERAL); }
   /* Numbers */     
   {Integer}                      { return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())); }
-  {Decimal}                      { return symbol(sym.DOUBLE_LITERAL, new Double(yytext())); }
+  {Decimal}                      { return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); }
   /* comments */
   {Comment}                      { /* ignore */ }
 

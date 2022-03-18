@@ -1,26 +1,22 @@
+package com.achess.project1testcompi;
 import java_cup.runtime.*;
+import java.util.List;
 
 parser code  {: 
-  public ParserP1(LexerP1 lexer){
+  public JavaParser(JavaLexer lexer){
         super(lexer);
     }
 
 
-    public void syntax_error(Symbol cur_token) {        
+    /* public void syntax_error(Symbol cur_token) {        
 		List<Integer> tokens = expected_token_ids();
         int line = cur_token.left;
         int column = cur_token.right;
         String lexeme = cur_token.value.toString();		
         String des = "Se esperaba: ";        
 		for(Integer i : tokens) {	
-            String fromId = symbl_name_from_id(i);
-            String symbolName = symbolNames.get(fromId);
-            if(symbolName != null){
-                des += "'"+symbolName+ "' o ";
-            }
-            else{
-                des += fromId +" o ";
-            }			
+            String fromId = symbl_name_from_id(i);                        
+			des += fromId +" o ";            
 		}
         des = des.substring(0, des.length() - 3);
         System.out.println(des);
@@ -29,12 +25,12 @@ parser code  {:
     public void report_fatal_error(String message, Object info) {
 		System.out.println("message: " + message);
 		System.out.println("info: " + info);
-	}
+	} */
     
 :};
 
 terminal BOOLEAN; // primitive_type
-terminal INT, LONG, CHAR; // integral_type
+terminal INT, LONG, CHAR, STRING; // integral_type
 terminal DOUBLE; // floating_point_type
 terminal LBRACK, RBRACK; // 
 terminal DOT; // qualified_name
@@ -251,7 +247,7 @@ modifiers ::= 	modifier
 	;
 modifier ::=	PUBLIC | PROTECTED | PRIVATE
 	|   STATIC | FINAL
-
+	;
 class_declaration ::= 
 	modifiers_opt CLASS IDENTIFIER class_body
 	;
@@ -318,10 +314,6 @@ formal_parameter ::=
 		type variable_declarator_id	
 	;
 	
-class_type_list ::=
-		class_type
-	|	class_type_list COMMA class_type
-	;
 method_body ::=	block
 	|	SEMICOLON
 	;
