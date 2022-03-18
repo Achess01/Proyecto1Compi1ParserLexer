@@ -8,24 +8,26 @@ parser code  {:
     }
 
 
-    /* public void syntax_error(Symbol cur_token) {        
+    public void syntax_error(Symbol cur_token) {        
 		List<Integer> tokens = expected_token_ids();
-        int line = cur_token.left;
-        int column = cur_token.right;
-        String lexeme = cur_token.value.toString();		
-        String des = "Se esperaba: ";        
+        //int line = cur_token.left;
+        //int column = cur_token.right;
+        String lexeme = symbl_name_from_id(cur_token.sym);
+        String des = "Se esperaba:    \n";
 		for(Integer i : tokens) {	
             String fromId = symbl_name_from_id(i);                        
 			des += fromId +" o ";            
 		}
         des = des.substring(0, des.length() - 3);
+		System.out.print(lexeme + " - ");
         System.out.println(des);
+
 	}
 
     public void report_fatal_error(String message, Object info) {
 		System.out.println("message: " + message);
 		System.out.println("info: " + info);
-	} */
+	}
     
 :};
 
@@ -211,14 +213,17 @@ qualified_name ::=
 // Start
 compilation_unit ::=		
 		import_declarations_opt
-		type_declarations_opt
+		type_declarations_opt		
 		;
-import_declarations_opt ::= import_declarations | ;
+import_declarations_opt ::= import_declarations | 
+							| error SEMICOLON
+							| error import_declarations														
+							;
 type_declarations_opt   ::= type_declarations   | ;
 
 import_declarations ::= 
 		import_declaration
-	|	import_declarations import_declaration
+	|	import_declarations import_declaration	
 	;
 type_declarations ::= 
 		type_declaration
@@ -227,7 +232,7 @@ type_declarations ::=
 
 import_declaration ::= 
 		single_type_import_declaration
-	|	type_import_on_demand_declaration
+	|	type_import_on_demand_declaration	
 	;
 single_type_import_declaration ::= 
 		IMPORT name SEMICOLON
