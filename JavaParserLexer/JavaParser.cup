@@ -261,13 +261,14 @@ class_body ::=	LBRACE class_body_declarations_opt RBRACE
 	;
 
 class_body_declarations_opt ::= 
-	|	class_body_declarations 
+	|	class_body_declarations 	
 	;
 
 class_body_declarations ::= 
 		class_body_declaration
 	|	class_body_declarations class_body_declaration
 	|	error class_body_declaration
+	| 	error RBRACE	
 	;
 class_body_declaration ::=
 		class_member_declaration	
@@ -351,15 +352,16 @@ explicit_constructor_invocation ::=
 
 
 //Blocks and Statements
-block ::=	LBRACE block_statements_opt RBRACE
+block ::=	LBRACE block_statements_opt RBRACE	
 	;
 block_statements_opt ::=
-	|	block_statements
+	|	block_statements	
 	;
 block_statements ::=
 		block_statement
-	|	block_statements block_statement
-	|	error block_statement
+	|	block_statements block_statement	
+	| 	error block_statement
+	| 	error RBRACE
 	;
 block_statement ::=
 		local_variable_declaration_statement

@@ -102,9 +102,7 @@ SingleCharacter = [^\r\n\'\\]
     "("                         { return symbol(sym.LPAREN); }
     ")"                         { return symbol(sym.RPAREN); }
     "{"                         { return symbol(sym.LBRACE); }
-    "}"                         { return symbol(sym.RBRACE); }
-    "["                         { return symbol(sym.LBRACK); }
-    "]"                         { return symbol(sym.RBRACK); }
+    "}"                         { return symbol(sym.RBRACE); }    
     /* separators */
     ";"                         { return symbol(sym.SEMICOLON); }
     ","                         { return symbol(sym.COMMA); }
