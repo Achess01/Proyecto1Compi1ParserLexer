@@ -10,8 +10,8 @@ parser code  {:
 
     public void syntax_error(Symbol cur_token) {        
 		List<Integer> tokens = expected_token_ids();
-        //int line = cur_token.left;
-        //int column = cur_token.right;
+        int line = cur_token.left;
+        int column = cur_token.right;
         String lexeme = symbl_name_from_id(cur_token.sym);
         String des = "Se esperaba:    \n";
 		for(Integer i : tokens) {	
@@ -19,7 +19,7 @@ parser code  {:
 			des += fromId +" o ";            
 		}
         des = des.substring(0, des.length() - 3);
-		System.out.print(lexeme + " - ");
+		System.out.print("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");
         System.out.println(des);
 
 	}
@@ -32,9 +32,8 @@ parser code  {:
 :};
 
 terminal BOOLEAN; // primitive_type
-terminal INT, LONG, CHAR, STRING; // integral_type
+terminal INT, CHAR, STRING; // integral_type
 terminal DOUBLE; // floating_point_type
-terminal LBRACK, RBRACK; // 
 terminal DOT; // qualified_name
 terminal SEMICOLON, MULT, COMMA, LBRACE, RBRACE, EQ, LPAREN, RPAREN, COLON;
 terminal IMPORT; // import_declaration
@@ -44,7 +43,6 @@ terminal FINAL;
 terminal CLASS; // class_declaration
 terminal VOID; // method_header
 terminal THIS, SUPER; // explicit_constructor_invocation
-terminal INTERFACE; // interface_declaration
 terminal IF, ELSE; // if_then_statement, if_then_else_statement
 terminal SWITCH; // switch_statement
 terminal CASE, DEFAULT; // switch_label
@@ -94,27 +92,27 @@ non terminal type_declaration;
 //
 non terminal modifiers_opt, modifiers, modifier;
 //Class Declaration
-non terminal class_declaration, super_cl, super_opt;
+non terminal class_declaration;
 non terminal class_body;
 non terminal class_body_declarations, class_body_declarations_opt;
 non terminal class_body_declaration, class_member_declaration;
-// 19.8.2) Field Declarations
+// Field Declarations
 non terminal field_declaration, variable_declarators, variable_declarator;
 non terminal variable_declarator_id, variable_initializer;
-// 19.8.3) Method Declarations
+//  Method Declarations
 non terminal method_declaration, method_header, method_declarator;
 non terminal formal_parameter_list_opt, formal_parameter_list;
 non terminal formal_parameter;
-non terminal class_type_list, method_body;
+non terminal method_body;
 
 
-// 19.8.5) Constructor Declarations
+// Constructor Declarations
 non terminal constructor_declaration, constructor_declarator;
 non terminal constructor_body;
 non terminal explicit_constructor_invocation;
 
 
-// 19.11) Blocks and Statements
+// Blocks and Statements
 non terminal block;
 non terminal block_statements_opt, block_statements, block_statement;
 non terminal local_variable_declaration_statement, local_variable_declaration;
@@ -214,10 +212,10 @@ qualified_name ::=
 compilation_unit ::=		
 		import_declarations_opt
 		type_declarations_opt		
+		| error type_declarations_opt
 		;
-import_declarations_opt ::= import_declarations | 
-							| error SEMICOLON
-							| error import_declarations														
+import_declarations_opt ::= import_declarations | 							
+							| error import_declarations							
 							;
 type_declarations_opt   ::= type_declarations   | ;
 
@@ -242,7 +240,7 @@ type_import_on_demand_declaration ::=
 	;
 type_declaration ::=
 		class_declaration	
-	|	SEMICOLON
+		| SEMICOLON	
 	;
 
 // 
@@ -257,9 +255,9 @@ modifier ::=	PUBLIC | PROTECTED | PRIVATE
 	;
 class_declaration ::= 
 	modifiers_opt CLASS IDENTIFIER:id class_body
-	{: System.out.println(id); :}
+	{: System.out.println(id); :}	
 	;
-class_body ::=	LBRACE class_body_declarations_opt RBRACE 
+class_body ::=	LBRACE class_body_declarations_opt RBRACE 	
 	;
 
 class_body_declarations_opt ::= 
@@ -269,11 +267,11 @@ class_body_declarations_opt ::=
 class_body_declarations ::= 
 		class_body_declaration
 	|	class_body_declarations class_body_declaration
+	|	error class_body_declaration
 	;
 class_body_declaration ::=
 		class_member_declaration	
-	|	constructor_declaration
-	|	block
+	|	constructor_declaration	
 	;
 class_member_declaration ::=
 		field_declaration
