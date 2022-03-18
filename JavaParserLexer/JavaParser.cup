@@ -201,11 +201,11 @@ name	::=	simple_name
 	|	qualified_name
 	;
 simple_name ::=	IDENTIFIER:id 
-			{: System.out.println(id); :}
+			{: /*System.out.println(id);*/ :}
 	;
 qualified_name ::=
 		name DOT IDENTIFIER:id
-		{: System.out.println(id); :}
+		{: /*System.out.println(id);*/ :}
 	;
 
 // Start
@@ -255,7 +255,7 @@ modifier ::=	PUBLIC | PROTECTED | PRIVATE
 	;
 class_declaration ::= 
 	modifiers_opt CLASS IDENTIFIER:id class_body
-	{: System.out.println(id); :}	
+	{: /*System.out.println(id);*/ :}	
 	;
 class_body ::=	LBRACE class_body_declarations_opt RBRACE 	
 	;
@@ -293,7 +293,7 @@ variable_declarator ::=
 	;
 variable_declarator_id ::=
 		IDENTIFIER:id	
-		{: System.out.println(id); :}
+		{: /*System.out.println(id);*/ :}
 	;
 variable_initializer ::=
 		expression	
@@ -309,7 +309,7 @@ method_header ::=
 	;
 method_declarator ::=
 		IDENTIFIER:id LPAREN formal_parameter_list_opt RPAREN	
-		{: System.out.println(id); :}
+		{: /*System.out.println(id);*/ :}
 	;
 formal_parameter_list_opt ::=
 	|	formal_parameter_list
@@ -359,6 +359,7 @@ block_statements_opt ::=
 block_statements ::=
 		block_statement
 	|	block_statements block_statement
+	|	error block_statement
 	;
 block_statement ::=
 		local_variable_declaration_statement
@@ -478,7 +479,7 @@ statement_expression_list ::=
 
 identifier_opt ::= 
 	|	IDENTIFIER:id
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	;
 
 break_statement ::=
@@ -512,20 +513,20 @@ argument_list ::=
 	;
 field_access ::=
 		primary DOT IDENTIFIER:id
-		{: System.out.println(id); :}
+		{: /*System.out.println(id);*/ :}
 	|	SUPER DOT IDENTIFIER:id
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	|	name DOT SUPER DOT IDENTIFIER:id
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	;
 method_invocation ::=
 		name LPAREN argument_list_opt RPAREN
 	|	primary DOT IDENTIFIER:id LPAREN argument_list_opt RPAREN
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	|	SUPER DOT IDENTIFIER:id LPAREN argument_list_opt RPAREN
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	|	name DOT SUPER DOT IDENTIFIER:id LPAREN argument_list_opt RPAREN
-	{: System.out.println(id); :}
+	{: /*System.out.println(id);*/ :}
 	;
 
 postfix_expression ::=
