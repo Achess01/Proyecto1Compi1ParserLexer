@@ -255,7 +255,8 @@ class_body ::=	LBRACE class_body_declarations_opt RBRACE
 	;
 
 class_body_declarations_opt ::= 
-	|	class_body_declarations ;
+	|	class_body_declarations 
+	;
 
 class_body_declarations ::= 
 		class_body_declaration

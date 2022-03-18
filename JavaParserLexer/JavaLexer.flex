@@ -96,6 +96,7 @@ SingleCharacter = [^\r\n\'\\]
     "this"                      { return symbol(sym.THIS);}
     "super"                     { return symbol(sym.SUPER);}    
     "new"                       { return symbol(sym.NEW);}
+    "class"                     { return symbol(sym.CLASS);}
   
     /* grouping */
     "("                         { return symbol(sym.LPAREN); }
