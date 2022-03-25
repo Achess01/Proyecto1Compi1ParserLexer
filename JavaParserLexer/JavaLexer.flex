@@ -1,4 +1,5 @@
-package com.achess.project1testcompi;
+package com.achess.server.lexer;
+import com.achess.server.parser.sym;
 import java_cup.runtime.*;
 
 %%
