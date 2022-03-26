@@ -3,10 +3,10 @@ import com.achess.server.lexer.JavaLexer;
 import com.achess.server.classAndMembers.*;
 import java_cup.runtime.*;
 import java.util.List;
+import java.util.ArrayList;
 
 parser code  {: 
-
-  String actualType;
+  
   public JavaParser(JavaLexer lexer){
         super(lexer);
     }
@@ -82,7 +82,7 @@ non terminal String integral_type, floating_point_type;
 non terminal String reference_type;
 non terminal String class_type;
 //Names
-non terminal name, simple_name, qualified_name;
+non terminal String name, simple_name, qualified_name;
 // Import
 non terminal compilation_unit;
 non terminal import_declarations_opt, import_declarations;
@@ -194,7 +194,7 @@ primitive_type ::=
 	:}
 	|	BOOLEAN
 	{:
-		RESULT="Boolean";
+		RESULT="boolean";
 	:}
     |   STRING
 	{:
@@ -213,17 +213,17 @@ numeric_type::=	integral_type:it
 integral_type ::= 	
     	INT 	
 	{:
-		RESULT="Int";
+		RESULT="int";
 	:}
 	|	CHAR
 	{:
-		RESULT="Char";
+		RESULT="char";
 	:} 
 	;
 floating_point_type ::= 		
     	DOUBLE
 		{:
-			RESULT="Double";
+			RESULT="double";
 		:}
 	;
 
@@ -312,7 +312,7 @@ class_declaration ::=
 					Variable v = (Variable) member;
 					v.setScope(id);
 				}
-			})
+			});
 		} 
 		System.out.println(arr);
 	:}	
@@ -337,7 +337,9 @@ class_body_declarations ::=
 		:}
 	|	class_body_declarations:arr class_body_declaration:bd
 		{:
-			arr.addAll(bd);
+			if(bd != null){
+				arr.addAll(bd);
+			}
 			RESULT=arr;
 		:}
 	|	error class_body_declaration
@@ -357,7 +359,8 @@ class_member_declaration ::=
 		:}
 	|	method_declaration:method
 	{:		
-		RESULT=new ArrayList<Member>().add(null);
+		ArrayList<Member> arr = new ArrayList(); //add method
+		RESULT=arr;
 	:}		
     | SEMICOLON
 	;
@@ -383,18 +386,18 @@ variable_declarators ::=
 	|	variable_declarators:array_members COMMA variable_declarator:var_member
 		{:
 			array_members.add(var_member);
-			RESULT=array_member;
+			RESULT=array_members;
 		:}
 	;
 variable_declarator ::=
 		variable_declarator_id:var_id
 		{: 
-			Member mb = new Variable(var_id, "");
+			Variable mb = new Variable(var_id, "");
 			RESULT=mb;
 		:}
 	|	variable_declarator_id:var_id EQ variable_initializer
 		{:
-			Member mb = new Variable(var_id, "");
+			Variable mb = new Variable(var_id, "");
 			RESULT=mb;
 		:}
 	;
