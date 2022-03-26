@@ -310,7 +310,7 @@ class_declaration ::=
 			arr.forEach(member ->{
 				if(member instanceof Variable){
 					Variable v = (Variable) member;
-					v.setScope(id);
+					v.setScope("Clase " + id);
 				}
 			});
 		} 
