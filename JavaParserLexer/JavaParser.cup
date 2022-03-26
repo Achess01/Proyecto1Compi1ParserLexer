@@ -107,9 +107,10 @@ non terminal String variable_declarator_id;
 non terminal variable_initializer;
 //  Method Declarations
 non terminal Method method_declaration;
-non terminal method_header, method_declarator;
-non terminal formal_parameter_list_opt, formal_parameter_list;
-non terminal formal_parameter;
+non terminal Method method_header; 
+non terminal Method method_declarator;
+non terminal ArrayList<Variable> formal_parameter_list_opt, formal_parameter_list;
+non terminal Variable formal_parameter;
 non terminal method_body;
 
 
@@ -360,6 +361,7 @@ class_member_declaration ::=
 	|	method_declaration:method
 	{:		
 		ArrayList<Member> arr = new ArrayList(); //add method
+		arr.add(method);
 		RESULT=arr;
 	:}		
     | SEMICOLON
@@ -412,25 +414,63 @@ variable_initializer ::=
 //Method Declarations
 method_declaration ::=
 		method_header:method method_body:variables
+		{:
+			System.out.println("Parámetros de: "  + method.getName());
+			System.out.println(method.getParams());
+			method.getParams().forEach(param ->{				
+				param.setScope("Método " + method.getName());
+			});
+			RESULT=method;
+		:}
 	;
 method_header ::=
-		modifiers_opt type method_declarator
-	|	modifiers_opt VOID method_declarator
+		modifiers_opt type:type method_declarator:method
+		{:
+			method.setType(type);			
+			RESULT=method;	
+		:}
+	|	modifiers_opt VOID method_declarator:method
+		{:
+			method.setType("void");
+			RESULT=method;
+		:}
 	;
 method_declarator ::=
-		IDENTIFIER:id LPAREN formal_parameter_list_opt RPAREN	
-		{: /*System.out.println(id);*/ :}
+		IDENTIFIER:id LPAREN formal_parameter_list_opt:params RPAREN	
+		{: 
+			Method method = new Method(id, "") ;
+			if(params != null){
+				method.setParams(params);			
+			}
+			RESULT=method;
+		:}
 	;
 formal_parameter_list_opt ::=
-	|	formal_parameter_list
+	|	formal_parameter_list:params
+		{:
+			RESULT=params;
+		:}
 	;
 formal_parameter_list ::=
-		formal_parameter
-	|	formal_parameter_list COMMA formal_parameter
+		formal_parameter:param
+		{:
+			ArrayList<Variable> params = new ArrayList();
+			params.add(param);
+			RESULT=params;
+		:}
+	|	formal_parameter_list:arr_params COMMA formal_parameter:param
+		{:
+			arr_params.add(param);
+			RESULT=arr_params;
+		:}
 	;
 
 formal_parameter ::=
-		type variable_declarator_id	
+		type:type variable_declarator_id:id
+		{:
+			Variable variable = new Variable(id, type);
+			RESULT=variable;
+		:}
 	;
 	
 method_body ::=	block
