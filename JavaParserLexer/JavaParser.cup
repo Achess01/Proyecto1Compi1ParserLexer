@@ -1,14 +1,15 @@
 package com.achess.server.parser;
 import com.achess.server.lexer.JavaLexer;
+import com.achess.server.classAndMembers.*;
 import java_cup.runtime.*;
 import java.util.List;
 
 parser code  {: 
+
+  String actualType;
   public JavaParser(JavaLexer lexer){
         super(lexer);
     }
-
-
     public void syntax_error(Symbol cur_token) {        
 		List<Integer> tokens = expected_token_ids();
         int line = cur_token.left;
@@ -76,10 +77,10 @@ non terminal initialState;
 
 non terminal literal;
 //Types, Values, and Variables
-non terminal type, primitive_type, numeric_type;
-non terminal integral_type, floating_point_type;
-non terminal reference_type;
-non terminal class_type;
+non terminal String type, primitive_type, numeric_type;
+non terminal String integral_type, floating_point_type;
+non terminal String reference_type;
+non terminal String class_type;
 //Names
 non terminal name, simple_name, qualified_name;
 // Import
@@ -94,14 +95,19 @@ non terminal type_declaration;
 non terminal modifiers_opt, modifiers, modifier;
 //Class Declaration
 non terminal class_declaration;
-non terminal class_body;
-non terminal class_body_declarations, class_body_declarations_opt;
-non terminal class_body_declaration, class_member_declaration;
+non terminal ArrayList<Member> class_body;
+non terminal ArrayList<Member> class_body_declarations, class_body_declarations_opt;
+non terminal ArrayList<Member> class_body_declaration;
+non terminal ArrayList<Member> class_member_declaration;
 // Field Declarations
-non terminal field_declaration, variable_declarators, variable_declarator;
-non terminal variable_declarator_id, variable_initializer;
+non terminal ArrayList<Member> field_declaration; 
+non terminal ArrayList<Member>variable_declarators;
+non terminal Variable variable_declarator;
+non terminal String variable_declarator_id; 
+non terminal variable_initializer;
 //  Method Declarations
-non terminal method_declaration, method_header, method_declarator;
+non terminal Method method_declaration;
+non terminal method_header, method_declarator;
 non terminal formal_parameter_list_opt, formal_parameter_list;
 non terminal formal_parameter;
 non terminal method_body;
@@ -172,41 +178,84 @@ literal ::=	INTEGER_LITERAL
 	;
 
 //Types, Values, and Variables
-type	::=	primitive_type
-	|	reference_type
+type	::=	primitive_type:pt
+	{:
+		RESULT=pt;
+	:}
+	|	reference_type:rt
+	{:
+		RESULT=rt;
+	:}
 	;
 primitive_type ::=
-		numeric_type
+		numeric_type:nt
+	{:
+		RESULT=nt;
+	:}
 	|	BOOLEAN
+	{:
+		RESULT="Boolean";
+	:}
     |   STRING
+	{:
+		RESULT="String";
+	:}
 	;
-numeric_type::=	integral_type
-	|	floating_point_type
+numeric_type::=	integral_type:it
+	{:
+		RESULT=it;
+	:}
+	|	floating_point_type:ft
+	{:
+		RESULT=ft;
+	:}
 	;
 integral_type ::= 	
     	INT 	
-	|	CHAR 
+	{:
+		RESULT="Int";
+	:}
+	|	CHAR
+	{:
+		RESULT="Char";
+	:} 
 	;
 floating_point_type ::= 		
     	DOUBLE
+		{:
+			RESULT="Double";
+		:}
 	;
 
 reference_type ::=
-		class_type	
+		class_type:ct
+		{:
+			RESULT=ct;
+		:}	
 	;
-class_type ::= name;
+class_type ::= name:name
+		{:
+			RESULT=name;
+		:}	
+		;
 
 
 // Names
-name	::=	simple_name
-	|	qualified_name
+name	::=	simple_name:sn
+		{:
+			RESULT=sn;
+		:}	
+	|	qualified_name:qn
+		{:
+			RESULT=qn;
+		:}
 	;
 simple_name ::=	IDENTIFIER:id 
-			{: /*System.out.println(id);*/ :}
+			{: RESULT=id; :}
 	;
 qualified_name ::=
 		name DOT IDENTIFIER:id
-		{: /*System.out.println(id);*/ :}
+		{: RESULT=id; :}
 	;
 
 // Start
@@ -255,47 +304,103 @@ modifier ::=	PUBLIC | PROTECTED | PRIVATE
 	|   STATIC | FINAL
 	;
 class_declaration ::= 
-	modifiers_opt CLASS IDENTIFIER:id class_body
-	{: /*System.out.println(id);*/ :}	
+	modifiers_opt CLASS IDENTIFIER:id class_body:arr
+	{: 
+		if(arr != null){
+			arr.forEach(member ->{
+				if(member instanceof Variable){
+					Variable v = (Variable) member;
+					v.setScope(id);
+				}
+			})
+		} 
+		System.out.println(arr);
+	:}	
 	;
-class_body ::=	LBRACE class_body_declarations_opt RBRACE 	
+class_body ::=	LBRACE class_body_declarations_opt:arr RBRACE
+				{:
+					RESULT=arr;
+				:}
 	;
 
 class_body_declarations_opt ::= 
-	|	class_body_declarations 	
+	|	class_body_declarations:arr
+		{:
+			RESULT=arr;
+		:} 	
 	;
 
 class_body_declarations ::= 
-		class_body_declaration
-	|	class_body_declarations class_body_declaration
+		class_body_declaration:classBD
+		{:
+			RESULT=classBD;
+		:}
+	|	class_body_declarations:arr class_body_declaration:bd
+		{:
+			arr.addAll(bd);
+			RESULT=arr;
+		:}
 	|	error class_body_declaration
 	| 	error RBRACE	
 	;
 class_body_declaration ::=
-		class_member_declaration	
-	|	constructor_declaration	
+		class_member_declaration:class_member	
+		{:
+			RESULT=class_member;
+		:}
+	|	constructor_declaration:constructor	
 	;
 class_member_declaration ::=
-		field_declaration
-	|	method_declaration	
+		field_declaration:field
+		{:
+			RESULT=field;
+		:}
+	|	method_declaration:method
+	{:		
+		RESULT=new ArrayList<Member>().add(null);
+	:}		
     | SEMICOLON
 	;
 
 //Field Declarations
 field_declaration ::= 
-		modifiers_opt type variable_declarators SEMICOLON
+		modifiers_opt type:type variable_declarators:array_members SEMICOLON
+		{:
+			array_members.forEach(m -> {
+            	Variable variable = (Variable) m;
+            	variable.setType(type);
+        	});
+			RESULT=array_members;
+		:}
 	;
 variable_declarators ::=
-		variable_declarator
-	|	variable_declarators COMMA variable_declarator
+		variable_declarator:var_member
+		{:
+			ArrayList<Member> members = new ArrayList();
+			members.add(var_member);
+			RESULT=members;
+		:}
+	|	variable_declarators:array_members COMMA variable_declarator:var_member
+		{:
+			array_members.add(var_member);
+			RESULT=array_member;
+		:}
 	;
 variable_declarator ::=
-		variable_declarator_id
-	|	variable_declarator_id EQ variable_initializer
+		variable_declarator_id:var_id
+		{: 
+			Member mb = new Variable(var_id, "");
+			RESULT=mb;
+		:}
+	|	variable_declarator_id:var_id EQ variable_initializer
+		{:
+			Member mb = new Variable(var_id, "");
+			RESULT=mb;
+		:}
 	;
 variable_declarator_id ::=
 		IDENTIFIER:id	
-		{: /*System.out.println(id);*/ :}
+		{: RESULT=id; :}
 	;
 variable_initializer ::=
 		expression	
@@ -303,7 +408,7 @@ variable_initializer ::=
 
 //Method Declarations
 method_declaration ::=
-		method_header method_body
+		method_header:method method_body:variables
 	;
 method_header ::=
 		modifiers_opt type method_declarator
