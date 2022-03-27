@@ -777,10 +777,7 @@ for_init ::=	statement_expression_list
 
 	;
 for_update_opt ::=
-	|	for_update:variables
-		{:
-			RESULT=variables;
-		:}
+	|	for_update
 
 	;
 for_update ::=	statement_expression_list
