@@ -428,7 +428,7 @@ method_declaration ::=
 			System.out.println("Parámetros de: "  + method.getName());			
 			System.out.println(method.getParams());
 			System.out.println("Variables de: "  + method.getName());			
-			System.out.println(method.getVariables());
+			method.getVariables().forEach(v -> System.out.println(v.getType() + " " + v.getName()));
 			RESULT=method;
 		:}
 	;
@@ -537,7 +537,9 @@ block_statements ::=
 		}else if(new_vars != null){
 			RESULT=new_vars;
 		}
-		RESULT=prev_vars;
+		else{
+				RESULT=prev_vars;
+			}
 	:}
 	| 	error block_statement
 	| 	error RBRACE
@@ -653,8 +655,9 @@ if_then_else_statement ::=
 				RESULT=prev_vars;
 			}else if(new_vars != null){
 				RESULT=new_vars;
+			}else{
+				RESULT=prev_vars;
 			}
-			RESULT=prev_vars;
 		:}
 	;
 if_then_else_statement_no_short_if ::=
@@ -666,8 +669,9 @@ if_then_else_statement_no_short_if ::=
 				RESULT=prev_vars;
 			}else if(new_vars != null){
 				RESULT=new_vars;
+			}else{
+				RESULT=prev_vars;
 			}
-			RESULT=prev_vars;
 		:}
 	;
 switch_statement ::=
@@ -700,8 +704,9 @@ switch_block_statement_groups ::=
 				RESULT=prev_vars;
 			}else if(new_vars != null){
 				RESULT=new_vars;
+			}else{
+				RESULT=prev_vars;
 			}
-			RESULT=prev_vars;
 		:}
 	;
 switch_block_statement_group ::=
@@ -746,8 +751,9 @@ for_statement ::=
 				RESULT=prev_vars;
 			}else if(new_vars != null){
 				RESULT=new_vars;
+			}else{
+				RESULT=prev_vars;
 			}
-			RESULT=prev_vars;
 		:}
 	;
 for_statement_no_short_if ::=
@@ -760,7 +766,9 @@ for_statement_no_short_if ::=
 			}else if(new_vars != null){
 				RESULT=new_vars;
 			}
-			RESULT=prev_vars;
+			else{
+				RESULT=prev_vars;
+			}
 		:}
 	;
 for_init_opt ::=
