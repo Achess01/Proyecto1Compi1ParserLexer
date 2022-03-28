@@ -94,7 +94,7 @@ non terminal type_declaration;
 //
 non terminal modifiers_opt, modifiers, modifier;
 //Class Declaration
-non terminal class_declaration;
+non terminal JavaClass class_declaration;
 non terminal ArrayList<Member> class_body;
 non terminal ArrayList<Member> class_body_declarations, class_body_declarations_opt;
 non terminal ArrayList<Member> class_body_declaration;
@@ -308,6 +308,7 @@ modifier ::=	PUBLIC | PROTECTED | PRIVATE
 class_declaration ::= 
 	modifiers_opt CLASS IDENTIFIER:id class_body:arr
 	{: 
+		JavaClass jc = new JavaClass(id);
 		if(arr != null){
 			arr.forEach(member ->{
 				if(member instanceof Variable){
@@ -315,8 +316,9 @@ class_declaration ::=
 					v.setScope("Clase " + id);
 				}
 			});
-		} 
-		System.out.println(arr);
+			jc.setMembers(arr);
+		}
+		System.out.println(jc);
 	:}	
 	;
 class_body ::=	LBRACE class_body_declarations_opt:arr RBRACE
