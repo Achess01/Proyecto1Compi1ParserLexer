@@ -115,8 +115,9 @@ non terminal ArrayList<Variable> method_body;
 
 
 // Constructor Declarations
-non terminal constructor_declaration, constructor_declarator;
-non terminal constructor_body;
+non terminal ArrayList<Member> constructor_declaration; 
+non terminal Method constructor_declarator;
+non terminal ArrayList<Variable> constructor_body;
 non terminal explicit_constructor_invocation;
 
 
@@ -351,7 +352,10 @@ class_body_declaration ::=
 		{:
 			RESULT=class_member;
 		:}
-	|	constructor_declaration:constructor	
+	|	constructor_declaration:constructor
+		{:
+			RESULT=constructor;
+		:}
 	;
 class_member_declaration ::=
 		field_declaration:field
@@ -425,10 +429,13 @@ method_declaration ::=
 			method.getParams().forEach(param ->{				
 				param.setScope("Método " + method.getName());
 			});
+
+			//Quitar
 			System.out.println("Parámetros de: "  + method.getName());			
 			System.out.println(method.getParams());
 			System.out.println("Variables de: "  + method.getName());			
 			method.getVariables().forEach(v -> System.out.println(v.getType() + " " + v.getName()));
+			//Quitar
 			RESULT=method;
 		:}
 	;
@@ -491,17 +498,46 @@ method_body ::=	block:variables
 
 //Constructor Declarations
 constructor_declaration ::=
-		modifiers_opt constructor_declarator 
-			constructor_body
+		modifiers_opt constructor_declarator:method 
+			constructor_body:variables
+			{:
+				if(variables != null){
+					variables.forEach(v -> v.setScope("Constructor " + method.getName()));
+					method.setVariables(variables);
+				}
+				ArrayList<Member> member = new ArrayList();
+				member.add(method);
+
+				System.out.println("Parámetros de: "  + method.getName());			
+				System.out.println(method.getParams());
+				System.out.println("Variables de: "  + method.getName());			
+				method.getVariables().forEach(v -> System.out.println(v.getType() + " " + v.getName()));
+
+				RESULT=member;
+			:}
 	;
 constructor_declarator ::=
-		simple_name LPAREN formal_parameter_list_opt RPAREN
+		simple_name:id LPAREN formal_parameter_list_opt:params RPAREN
+		{:
+			Method method = new Method(id, "~constructor");
+			if(params != null){
+				params.forEach(v -> v.setScope("Constructor " + id));
+				method.setParams(params);
+			}
+			RESULT=method;
+		:}
 	;
 constructor_body ::=
 		LBRACE explicit_constructor_invocation
-			block_statements RBRACE
+			block_statements:variables RBRACE
+			{:
+				RESULT=variables;
+			:}
 	|	LBRACE explicit_constructor_invocation RBRACE
-	|	LBRACE block_statements RBRACE
+	|	LBRACE block_statements:variables RBRACE
+		{:
+			RESULT=variables;
+		:}
 	|	LBRACE RBRACE
 	;
 explicit_constructor_invocation ::=
