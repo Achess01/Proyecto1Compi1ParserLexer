@@ -1,6 +1,7 @@
 package com.achess.server.lexer;
 import com.achess.server.parser.sym;
 import java_cup.runtime.*;
+import com.achess.server.classAndMembers.JavaProject;
 
 %%
 %class JavaLexer
@@ -11,7 +12,12 @@ import java_cup.runtime.*;
 %cup
 
 %{
+  private boolean firstProject;
   StringBuilder string = new StringBuilder();    
+
+  public void setFirstProject(boolean firstProject){
+    this.firstProject = firstProject;    
+  }
 
   private Symbol symbol(int type) {
     return new Symbol(type, yyline+1, yycolumn+1);
@@ -149,7 +155,7 @@ SingleCharacter = [^\r\n\'\\]
   {Integer}                      { return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())); }
   {Decimal}                      { return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); }
   /* comments */
-  {Comment}                      { /* ignore */ }
+  {Comment}                      { JavaProject.getProject(firstProject).addComment(yytext()); }
 
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }

@@ -320,7 +320,8 @@ class_declaration ::=
 			});
 			jc.setMembers(arr);
 		}
-		System.out.println(jc);
+		JavaProject.getProject(firstProject).addClass(jc);
+		System.out.println(JavaProject.getProject(firstProject));		
 	:}	
 	;
 class_body ::=	LBRACE class_body_declarations_opt:arr RBRACE
@@ -432,11 +433,7 @@ method_declaration ::=
 			}
 			method.getParams().forEach(param ->{				
 				param.setScope("Método " + method.getName());
-			});
-
-			//Quitar
-			
-			//Quitar
+			});			
 			RESULT=method;
 		:}
 	;
