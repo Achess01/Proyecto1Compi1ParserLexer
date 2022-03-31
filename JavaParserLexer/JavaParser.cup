@@ -321,7 +321,7 @@ class_declaration ::=
 			jc.setMembers(arr);
 		}
 		JavaProject.getProject(firstProject).addClass(jc);
-		System.out.println(JavaProject.getProject(firstProject));		
+		//System.out.println(JavaProject.getProject(firstProject));		
 	:}	
 	;
 class_body ::=	LBRACE class_body_declarations_opt:arr RBRACE
