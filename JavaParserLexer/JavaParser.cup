@@ -4,6 +4,7 @@ import com.achess.server.classAndMembers.*;
 import java_cup.runtime.*;
 import java.util.List;
 import java.util.ArrayList;
+import com.achess.server.error.JavaError;
 
 parser code  {: 
 	private boolean firstProject;
@@ -23,14 +24,14 @@ parser code  {:
 			des += fromId +" o ";            
 		}
         des = des.substring(0, des.length() - 3);
-		System.out.print("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");
-        System.out.println(des);
 
+		JavaError.getError().log("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");		
+		JavaError.getError().log(des);        
 	}
 
     public void report_fatal_error(String message, Object info) {
-		System.out.println("message: " + message);
-		System.out.println("info: " + info);
+		JavaError.getError().log("Message: " + message);
+		JavaError.getError().log("Info: " + info.toString());		
 	}
     
 :};
@@ -344,10 +345,12 @@ class_body_declarations ::=
 		:}
 	|	class_body_declarations:arr class_body_declaration:bd
 		{:
-			if(bd != null){
+			if(bd != null && arr != null){
 				arr.addAll(bd);
+				RESULT=arr;
+			}else if(bd != null){
+				RESULT=bd;
 			}
-			RESULT=arr;
 		:}
 	|	error class_body_declaration
 	| 	error RBRACE	
