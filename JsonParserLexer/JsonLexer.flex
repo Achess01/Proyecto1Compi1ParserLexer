@@ -1,23 +1,23 @@
 
 %%
-%class JavaLexer
+%class JsonLexer
 %public 
 %line 
 %column
 %standalone
+%int
 //%cup
 
-%{
-  private boolean firstProject;
+%{ 
   StringBuilder string = new StringBuilder();    
 
-  private Symbol symbol(int type) {
+  /* private Symbol symbol(int type) {
     return new Symbol(type, yyline+1, yycolumn+1);
   }
 
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline+1, yycolumn+1, value);
-  }
+  } */
 %}
 
 /* main character classes */
@@ -77,7 +77,7 @@ SingleCharacter = [^\r\n\'\\]
 }
 
 <STRING> {
-    \"                             { yybegin(YYINITIAL); System.out.println(yytext()); /* return symbol(sym.STRING_LITERAL, string.toString()); */ }
+    \"                             { yybegin(YYINITIAL); System.out.println(string.toString()); /* return symbol(sym.STRING_LITERAL, string.toString()); */ }
     
     {StringCharacter}+             { string.append( yytext() ); }
     
@@ -99,4 +99,4 @@ SingleCharacter = [^\r\n\'\\]
 /* error fallback */
 [^]                              { System.out.println("Illegal character \""+yytext()+
                                                               "\" at line "+yyline+", column "+yycolumn); }
-<<EOF>>                          { System.out.println(yytext()); /* return symbol(sym.EOF); */ }
+//<<EOF>>                          { System.out.println("fin"); /* return symbol(sym.EOF); */ }
