@@ -1,0 +1,187 @@
+
+
+parser code  {: 	
+  
+    public JsonParser(JavaLexer lexer){
+        super(lexer);		
+    }
+
+    public void syntax_error(Symbol cur_token) {        
+		List<Integer> tokens = expected_token_ids();
+        int line = cur_token.left;
+        int column = cur_token.right;
+        String lexeme = symbl_name_from_id(cur_token.sym);
+        String des = "Se esperaba:    \n";
+		for(Integer i : tokens) {	
+            String fromId = symbl_name_from_id(i);                        
+			des += fromId +" o ";            
+		}
+        des = des.substring(0, des.length() - 3);
+
+		System.out.println("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");		
+		System.out.println(des+"\n");
+	}
+
+    public void report_fatal_error(String message, Object info) {
+		System.out.println("Message: " + message);
+		System.out.println("Info: " + info.toString());		
+	}
+    
+:};
+
+terminal LBRACE, RBRACE;
+terminal LBRACKET, RBRACKET;
+terminal COMMA, COLON;
+//keys
+terminal CLASSES_LITERAL, METHODS_LITERAL, VARIABLES_LITERAL, COMMENTS_LITERAL;
+terminal SCORE_LITERAL;
+terminal NAME_LITERAL, FUNCTION_LITERAL, TYPE_LITERAL, PARAMETERS_LITERAL;
+terminal TEXT_LITERAL;
+//values
+terminal Integer INTEGER_LITERAL;
+terminal String STRING_LITERAL;
+
+
+non terminal initialState;
+non terminal json_declaration;
+
+non terminal json_body;
+non terminal json_body_item;
+
+non terminal score_declaration;
+non terminal variables_declaration;
+non terminal methods_declaration;
+non terminal classes_declaration;
+non terminal comments_declaration;
+
+non terminal list_variables_opt;
+non terminal list_variables;
+non terminal variable_item;
+non terminal variable_item_body;
+
+non terminal list_methods_opt;
+non terminal list_methods;
+non terminal method_item;
+non terminal method_item_body;
+
+non terminal list_classes_opt;
+non terminal list_classes;
+non terminal class_item;
+non terminal class_item_body;
+
+non terminal list_comments_opt;
+non terminal list_comments;
+non terminal comment_item;
+non terminal comment_item_body;
+
+
+non terminal name_item;
+non terminal type_item;
+non terminal function_item;
+non terminal parameters_item;
+non terminal text_item;
+
+
+start with initialState;
+
+
+initialState ::= json_declaration
+                ;
+
+json_declaration ::= LBRACE json_body RBRACE
+                    ;
+
+json_body ::= json_body_item
+            | json_body COMMA json_body_item
+            ;
+
+json_body_item ::=  score_declaration
+                |   variables_declaration
+                |   methods_declaration
+                |   classes_declaration
+                |   comments_declaration
+                ;
+
+score_declaration ::=   SCORE_LITERAL COLON STRING_LITERAL
+                        ;
+
+variables_declaration ::=   VARIABLES_LITERAL COLON LBRACKET list_variables_opt RBRACKET
+                            ;
+
+list_variables_opt ::=  
+                    |   list_variables
+                    ;
+
+list_variables ::=  variable_item
+                |   list_variables COMMA variable_item;
+
+variable_item ::=   LBRACE variable_item_body LBRACE
+                    ;
+
+variable_item_body ::=  name_item COMMA type_item COMMA function_item
+                        ;                        
+                        //Maybe add more productions to allow diferent orders
+
+methods_declaration ::=   METHODS_LITERAL COLON LBRACKET list_methods_opt RBRACKET
+                            ;
+
+list_methods_opt ::=  
+                    |   list_methods
+                    ;
+
+list_methods ::=  method_item
+                |   list_methods COMMA method_item;
+
+method_item ::=   LBRACE method_item_body LBRACE
+                    ;
+
+method_item_body ::=  name_item COMMA type_item COMMA parameters_item
+                        ;                        
+                        //Maybe add more productions to allow diferent orders     
+
+classes_declaration ::=   CLASSES_LITERAL COLON LBRACKET list_classes_opt RBRACKET
+                            ;
+
+list_classes_opt ::=  
+                    |   list_classes
+                    ;
+
+list_classes ::=  class_item
+                |   list_classes COMMA class_item;
+
+class_item ::=   LBRACE class_item_body LBRACE
+                    ;
+
+class_item_body ::=  name_item
+                        ;                        
+                        //Maybe add more productions to allow diferent orders     
+
+list_comments_opt ::=  
+                    |   list_comments
+                    ;
+
+list_comments ::=  comment_item
+                |   list_comments COMMA comment_item;
+
+comment_item ::=   LBRACE comment_item_body LBRACE
+                    ;
+
+comment_item_body ::=  text_item
+                        ;                        
+                        //Maybe add more productions to allow diferent orders                             
+
+name_item ::=   NAME_LITERAL COLON STRING_LITERAL
+                ;
+
+type_item ::=   TYPE_LITERAL COLON STRING_LITERAL
+                ;
+
+function_item ::=   FUNCTION_LITERAL COLON STRING_LITERAL
+                    ;
+
+parameters_item ::= PARAMETERS_LITERAL COLON STRING_LITERAL
+                    ;
+
+text_item ::=   TEXT_LITERAL COLON STRING_LITERAL
+                ;
+

@@ -69,7 +69,7 @@ SingleCharacter = [^\r\n\'\\]
   
   /* Numbers */     
   {Integer}                      { System.out.println(yytext()); /* return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())); */ }
-  {Decimal}                      { System.out.println(yytext()); /* return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); */ }
+  //{Decimal}                      { System.out.println(yytext()); /* return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); */ }
   
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
@@ -77,8 +77,7 @@ SingleCharacter = [^\r\n\'\\]
 }
 
 <STRING> {
-    \"                             { yybegin(YYINITIAL); System.out.println(string.toString()); /* return symbol(sym.STRING_LITERAL, string.toString()); */ }
-    
+    \"                             { yybegin(YYINITIAL); System.out.println(string.toString()); /* return symbol(sym.STRING_LITERAL, string.toString()); */ }    
     {StringCharacter}+             { string.append( yytext() ); }
     
     /* escape sequences */
