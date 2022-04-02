@@ -1,6 +1,13 @@
 package com.achess.client.jsonParserLexer;
 import java.util.List;
 import java_cup.runtime.Symbol;
+import com.achess.client.attribute.*;
+import com.achess.client.jsonMembers.Comment;
+import com.achess.client.jsonMembers.JavaClass;
+import com.achess.client.jsonMembers.Method;
+import com.achess.client.jsonMembers.Score;
+import com.achess.client.jsonMembers.Variable;
+import com.achess.client.error.Error;
 
 parser code  {: 	
   
@@ -22,13 +29,13 @@ parser code  {:
 		}
         des = des.substring(0, des.length() - 3);
 
-		System.out.println("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");		
-		if(count) System.out.println(des+"\n");
+		Error.getError().log("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");		
+		if(count) Error.getError().log(des+"\n");
 	}
 
     public void report_fatal_error(String message, Object info) {
-		System.out.println("Message: " + message);
-		System.out.println("Info: " + info.toString());		
+		Error.getError().log("Message: " + message);
+		Error.getError().log("Info: " + info.toString());		
 	}
     
 :};
@@ -49,41 +56,41 @@ terminal String STRING_LITERAL;
 non terminal initialState;
 non terminal json_declaration;
 
-non terminal json_body;
-non terminal json_body_item;
+non terminal ArrayList<Attribute> json_body;
+non terminal Attribute json_body_item;
 
-non terminal score_declaration;
-non terminal variables_declaration;
-non terminal methods_declaration;
-non terminal classes_declaration;
-non terminal comments_declaration;
+non terminal Attribute score_declaration;
+non terminal Attribute variables_declaration;
+non terminal Attribute methods_declaration;
+non terminal Attribute classes_declaration;
+non terminal Attribute comments_declaration;
 
-non terminal list_variables_opt;
-non terminal list_variables;
-non terminal variable_item;
-non terminal variable_item_body;
+non terminal ArrayList<Variable> list_variables_opt;
+non terminal ArrayList<Variable> list_variables;
+non terminal Variable variable_item;
+non terminal Variable variable_item_body;
 
-non terminal list_methods_opt;
-non terminal list_methods;
-non terminal method_item;
-non terminal method_item_body;
+non terminal ArrayList<Method> list_methods_opt;
+non terminal ArrayList<Method> list_methods;
+non terminal Method method_item;
+non terminal Method method_item_body;
 
-non terminal list_classes_opt;
-non terminal list_classes;
-non terminal class_item;
-non terminal class_item_body;
+non terminal ArrayList<JavaClass> list_classes_opt;
+non terminal ArrayList<JavaClass> list_classes;
+non terminal JavaClass class_item;
+non terminal JavaClass class_item_body;
 
-non terminal list_comments_opt;
-non terminal list_comments;
-non terminal comment_item;
-non terminal comment_item_body;
+non terminal ArrayList<Comment> list_comments_opt;
+non terminal ArrayList<Comment> list_comments;
+non terminal Comment comment_item;
+non terminal Comment comment_item_body;
 
 
-non terminal name_item;
-non terminal type_item;
-non terminal function_item;
-non terminal parameters_item;
-non terminal text_item;
+non terminal String name_item;
+non terminal String type_item;
+non terminal String function_item;
+non terminal Integer parameters_item;
+non terminal String text_item;
 
 
 start with initialState;
@@ -92,20 +99,49 @@ start with initialState;
 initialState ::= json_declaration
                 ;
 
-json_declaration ::= LBRACE json_body RBRACE
+json_declaration ::= LBRACE json_body:body RBRACE
+                    {:
+                        if(Error.getError().isErrorFounded()){
+                            ValidateJson.validate(body);
+                        }
+                    :}
                     ;
 
-json_body ::= json_body_item
-            | json_body COMMA json_body_item
+json_body ::= json_body_item:attr
+            {:
+                ArrayList<Attribute> attributes = new ArrayList();
+                attributes.add(attr);
+                RESULT=attributes;
+            :}
+            | json_body:arr COMMA json_body_item:attr
+            {:
+                arr.add(attr);
+                RESULT=arr;
+            :}
             | error json_body_item
             | error RBRACKET        
             ;
 
-json_body_item ::=  score_declaration
-                |   variables_declaration
-                |   methods_declaration
-                |   classes_declaration
-                |   comments_declaration                
+json_body_item ::=  score_declaration:attr
+                {:
+                    RESULT=attr;
+                :}
+                |   variables_declaration:attr
+                {:
+                    RESULT=attr;
+                :}
+                |   methods_declaration:attr
+                {:
+                    RESULT=attr;
+                :}
+                |   classes_declaration:attr
+                {:
+                    RESULT=attr;
+                :}
+                |   comments_declaration:attr           
+                {:
+                    RESULT=attr;
+                :}
                 ;
 
 score_declaration ::=   SCORE_LITERAL COLON STRING_LITERAL
