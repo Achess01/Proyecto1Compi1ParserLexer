@@ -8,6 +8,7 @@ import com.achess.client.jsonMembers.Method;
 import com.achess.client.jsonMembers.Score;
 import com.achess.client.jsonMembers.Variable;
 import com.achess.client.error.Error;
+import java.util.ArrayList;
 
 parser code  {: 	
   
@@ -101,7 +102,7 @@ initialState ::= json_declaration
 
 json_declaration ::= LBRACE json_body:body RBRACE
                     {:
-                        if(Error.getError().isErrorFounded()){
+                        if(!Error.getError().isErrorFounded()){
                             ValidateJson.validate(body);
                         }
                     :}
@@ -144,90 +145,227 @@ json_body_item ::=  score_declaration:attr
                 :}
                 ;
 
-score_declaration ::=   SCORE_LITERAL COLON STRING_LITERAL
+score_declaration ::=   SCORE_LITERAL COLON STRING_LITERAL:score
+                        {:
+                            Attribute<Score> att = new Attribute(new Score(score), Attribute.SCORE, scoreleft);
+                            RESULT=att;
+                        :}
                         ;
 
-variables_declaration ::=   VARIABLES_LITERAL COLON LBRACKET list_variables_opt RBRACKET
+variables_declaration ::=   VARIABLES_LITERAL COLON LBRACKET list_variables_opt:list RBRACKET
+                            {:
+                                ArrayList<Variable> arr;
+                                if(list == null){
+                                    arr = new ArrayList();
+                                }else{
+                                    arr = list;
+                                }
+                                Attribute<ArrayList<Variable>> att = new Attribute(arr, Attribute.VARIABLES, listleft);
+                                RESULT=att;
+                            :}
                             ;
 
 list_variables_opt ::=  
-                    |   list_variables
+                    |   list_variables:list
+                    {:
+                        RESULT=list;
+                    :}
                     ;
 
-list_variables ::=  variable_item
-                |   list_variables COMMA variable_item                
+list_variables ::=  variable_item:variable
+                {:
+                    ArrayList<Variable> arr = new ArrayList();
+                    arr.add(variable);
+                    RESULT=arr;
+                :}
+                |   list_variables:arr COMMA variable_item:variable
+                {:
+                    arr.add(variable);                    
+                    RESULT=arr;
+                :}
                 ;
 
-variable_item ::=   LBRACE variable_item_body RBRACE
+variable_item ::=   LBRACE variable_item_body:variable RBRACE
+                    {:
+                        RESULT=variable;
+                    :}
                     ;
 
-variable_item_body ::=  name_item COMMA type_item COMMA function_item
+variable_item_body ::=  name_item:name COMMA type_item:type COMMA function_item:function
+                        {:
+                            Variable variable = new Variable(name, type, function);
+                            RESULT=variable;
+                        :}
                         ;                        
                         //Maybe add more productions to allow diferent orders
 
-methods_declaration ::=   METHODS_LITERAL COLON LBRACKET list_methods_opt RBRACKET
+methods_declaration ::=   METHODS_LITERAL COLON LBRACKET list_methods_opt:list RBRACKET
+                             {:
+                                ArrayList<Method> arr;
+                                if(list == null){
+                                    arr = new ArrayList();
+                                }else{
+                                    arr = list;
+                                }
+                                Attribute<ArrayList<Method>> att = new Attribute(arr, Attribute.METHODS, listleft);
+                                RESULT=att;
+                            :}
                             ;
 
 list_methods_opt ::=  
-                    |   list_methods
+                    |   list_methods:list
+                    {:
+                        RESULT=list;
+                    :}
                     ;
 
-list_methods ::=  method_item
-                |   list_methods COMMA method_item;
+list_methods ::=  method_item:method
+                {:
+                    ArrayList<Method> arr= new ArrayList();
+                    arr.add(method);
+                    RESULT=arr;
+                :}
+                |   list_methods:arr COMMA method_item:method
+                {:
+                    arr.add(method);
+                    RESULT=arr;
+                :}
+                ;
 
-method_item ::=   LBRACE method_item_body RBRACE
+method_item ::=   LBRACE method_item_body:method RBRACE
+                    {:
+                        RESULT=method;
+                    :}
                     ;
 
-method_item_body ::=  name_item COMMA type_item COMMA parameters_item
+method_item_body ::=  name_item:name COMMA type_item:type COMMA parameters_item:par
+                        {:
+                            Method method = new Method(name, type, par);
+                            RESULT=method;
+                        :}
                         ;                        
                         //Maybe add more productions to allow diferent orders     
 
-classes_declaration ::=   CLASSES_LITERAL COLON LBRACKET list_classes_opt RBRACKET
+classes_declaration ::=   CLASSES_LITERAL COLON LBRACKET list_classes_opt:list RBRACKET
+                            {:
+                                ArrayList<JavaClass> arr;
+                                if(list == null){
+                                    arr = new ArrayList();
+                                }else{
+                                    arr = list;
+                                }
+                                Attribute<ArrayList<JavaClass>> att = new Attribute(arr, Attribute.CLASSES, listleft);
+                                RESULT=att;
+                            :}
                             ;
 
 list_classes_opt ::=  
-                    |   list_classes
+                    |   list_classes:list
+                    {:
+                        RESULT=list;
+                    :}
                     ;
 
-list_classes ::=  class_item
-                |   list_classes COMMA class_item                                
+list_classes ::=  class_item:java_class
+                {:
+                    ArrayList<JavaClass> arr = new ArrayList();
+                    arr.add(java_class);
+                    RESULT=arr;
+                :}
+                |   list_classes:arr COMMA class_item:java_class
+                {:
+                    arr.add(java_class);
+                    RESULT=arr;
+                :}
                 ;
 
-class_item ::=   LBRACE class_item_body RBRACE
+class_item ::=   LBRACE class_item_body:java_class RBRACE
+                    {:
+                        RESULT=java_class;
+                    :}
                     ;
 
-class_item_body ::=  name_item
+class_item_body ::=  name_item:name
+                        {:
+                            JavaClass jc = new JavaClass(name);
+                            RESULT = jc;
+                        :}
                         ;                        
                         //Maybe add more productions to allow diferent orders     
-comments_declaration ::=   COMMENTS_LITERAL COLON LBRACKET list_comments_opt RBRACKET
+comments_declaration ::=   COMMENTS_LITERAL COLON LBRACKET list_comments_opt:list RBRACKET
+                        {:
+                                ArrayList<Comment> arr;
+                                if(list == null){
+                                    arr = new ArrayList();
+                                }else{
+                                    arr = list;
+                                }
+                                Attribute<ArrayList<Comment>> att = new Attribute(arr, Attribute.COMMENTS, listleft);
+                                RESULT=att;
+                        :}                            
                         ;
 
 list_comments_opt ::=  
-                    |   list_comments
+                    |   list_comments:list
+                    {:
+                        RESULT=list;
+                    :}
                     ;
 
-list_comments ::=  comment_item
-                |   list_comments COMMA comment_item;
+list_comments ::=  comment_item:comment
+                {:
+                    ArrayList<Comment> arr = new ArrayList();
+                    arr.add(comment);
+                    RESULT=arr;
+                :}
+                |   list_comments:arr COMMA comment_item:comment
+                {:
+                    arr.add(comment);
+                    RESULT=arr;
+                :}
+                ;
 
-comment_item ::=   LBRACE comment_item_body RBRACE
+comment_item ::=   LBRACE comment_item_body:comment RBRACE
+                    {:
+                        RESULT=comment;
+                    :}
                     ;
 
-comment_item_body ::=  text_item
+comment_item_body ::=  text_item:text
+                        {:
+                            Comment comment = new Comment(text);
+                            RESULT=comment;
+                        :}
                         ;                        
                         //Maybe add more productions to allow diferent orders                             
 
-name_item ::=   NAME_LITERAL COLON STRING_LITERAL
+name_item ::=   NAME_LITERAL COLON STRING_LITERAL:st
+                {:
+                    RESULT=st;
+                :}
                 ;
 
-type_item ::=   TYPE_LITERAL COLON STRING_LITERAL
+type_item ::=   TYPE_LITERAL COLON STRING_LITERAL:st
+                {:
+                    RESULT=st;
+                :}
                 ;
 
-function_item ::=   FUNCTION_LITERAL COLON STRING_LITERAL
+function_item ::=   FUNCTION_LITERAL COLON STRING_LITERAL:st
+                {:
+                    RESULT=st;
+                :}
                     ;
 
-parameters_item ::= PARAMETERS_LITERAL COLON INTEGER_LITERAL
+parameters_item ::= PARAMETERS_LITERAL COLON INTEGER_LITERAL:int_literal
+                {:
+                    RESULT=int_literal;
+                :}
                     ;
 
-text_item ::=   TEXT_LITERAL COLON STRING_LITERAL
+text_item ::=   TEXT_LITERAL COLON STRING_LITERAL:st
+                {:
+                    RESULT=st;
+                :}
                 ;
 
