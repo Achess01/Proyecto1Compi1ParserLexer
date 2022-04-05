@@ -1,0 +1,35 @@
+
+parser code  {: 	
+  
+    public CopyParser(JsonLexer lexer){
+        super(lexer);		
+    }
+
+    public void syntax_error(Symbol cur_token) {        
+		List<Integer> tokens = expected_token_ids();
+        int line = cur_token.left;
+        int column = cur_token.right;
+        String lexeme = symbl_name_from_id(cur_token.sym);
+        String des = "Se esperaba:    \n";
+        boolean count = false;
+		for(Integer i : tokens) {	
+            String fromId = symbl_name_from_id(i);                        
+			des += fromId +" o ";                        
+            count = true;
+		}
+        des = des.substring(0, des.length() - 3);
+
+        Error.getError().log("COPY:\n");
+		Error.getError().log("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");
+		if(count) Error.getError().log(des+"\n");
+	}
+
+    public void report_fatal_error(String message, Object info) {
+        Error.getError().log("COPY:\n");
+		Error.getError().log("Message: " + message);
+		Error.getError().log("Info: " + info.toString());		
+	}
+    
+:};
+
+terminal GREATER, LESS;
