@@ -1,22 +1,24 @@
+package com.achess.client.copyParserLexer;
+import java_cup.runtime.Symbol;
+import com.achess.client.error.ClientError;
 %%
 %class CopyLexer
 %public 
 %line 
 %column
-%standalone
-//%cup
+//%standalone
+%cup
 
 %{  
   StringBuilder string = new StringBuilder();    
-
-  /*
+  
   private Symbol symbol(int type) {
     return new Symbol(type, yyline+1, yycolumn+1);
   }
 
   private Symbol symbol(int type, Object value) {
     return new Symbol(type, yyline+1, yycolumn+1, value);
-  } */
+  }
 %}
 
 /* main character classes */
@@ -74,17 +76,27 @@ t = [tT]
 //y = [yY]
 //z = [zZ]
 
-Html = {h}{t}{m}{l}
-H1 = {h} "1"
-H2 = {h} "2"
-Table = {t}{a}{b}{l}{e}
-For = {f}{o}{r}
+Html_open = "<"{h}{t}{m}{l}
+H1_open = "<"{h}"1"
+H2_open = "<"{h}"2"
+Table_open = "<"{t}{a}{b}{l}{e}
+For_open = "<"{f}{o}{r}
+Tr_open = "<"{t}{r}
+Th_open = "<"{t}{h}
+Td_open = "<"{t}{d}
+Br_open = "<"{b}{r}
 Iterador = {i}{t}{e}{r}{a}{d}{o}{r}
 Hasta = {h}{a}{s}{t}{a}
-Tr = {t}{r}
-Th = {t}{h}
-Td = {t}{d}
-Br = {b}{r}
+
+
+Html_close = "</"{h}{t}{m}{l}
+H1_close = "</"{h}"1"
+H2_close = "</"{h}"2"
+Table_close = "</"{t}{a}{b}{l}{e}
+For_close = "</"{f}{o}{r}
+Tr_close = "</"{t}{r}
+Th_close = "</"{t}{h}
+Td_close = "</"{t}{d}
 
 
 %state STRING
@@ -93,86 +105,104 @@ Br = {b}{r}
 
 <YYINITIAL> {
 
-    {Html}
-    {System.out.println("HTML") /* System.out.println("HTML") /* return symbol(sym.HTML) */; }
-    {H1}
-    {System.out.println("H1") /* return symbol(sym.H1) */;}
-    {H2}
-    {System.out.println("H2") /* return symbol(sym.H2) */;}
-    {Table}
-    {System.out.println("TABLE") /* return symbol(sym.TABLE) */;}
-    {For}
-    {System.out.println("FOR") /* return symbol(sym.FOR) */;}
-    {Iterador}
-    {System.out.println("ITERADOR") /* return symbol(sym.ITERADOR) */;}
-    {Hasta}
-    {System.out.println("HASTA") /* return symbol(sym.HASTA) */;}    
-    {Tr}
-    {System.out.println("TR") /* return symbol(sym.TR) */;}
-    {Th}
-    {System.out.println("TH") /* return symbol(sym.TH) */;}
-    {Td}
-    {System.out.println("TD") /* return symbol(sym.TD) */;}
-    {Br}
-    {System.out.println("BR") /* return symbol(sym.BR) */;}
+    {Html_open}
+    {return symbol(sym.HTML_OPEN); }
+    {H1_open}
+    {return symbol(sym.H1_OPEN);}
+    {H2_open}
+    {return symbol(sym.H2_OPEN);}
+    {Table_open}
+    {return symbol(sym.TABLE_OPEN);}
+    {For_open}
+    {return symbol(sym.FOR_OPEN);}
+    {Tr_open}
+    {return symbol(sym.TR_OPEN);}
+    {Th_open}
+    {return symbol(sym.TH_OPEN);}
+    {Td_open}
+    {return symbol(sym.TD_OPEN);}
+    {Br_open}
+    {return symbol(sym.BR_OPEN);}
 
-    "String"                    { System.out.println("STRING") /* return symbol(sym.STRING) */; }
-    "Integer"                   { System.out.println("INTEGER") /* return symbol(sym.INTEGER) */; }
-    "RESULT"                    { System.out.println("RESULT") /* return symbol(sym.RESULT) */; }
-    "Score"                     { System.out.println("SCORE") /* return symbol(sym.SCORE) */; }
-    "Clases"                    { System.out.println("CLASES") /* return symbol(sym.CLASES) */; }
-    "Metodos"                   { System.out.println("METODOS") /* return symbol(sym.METODOS) */; }
-    "Variables"                 { System.out.println("VARIABLES") /* return symbol(sym.VARIABLES) */; }
-    "Comentarios"               { System.out.println("COMENTARIOS") /* return symbol(sym.COMENTARIOS) */; }
-    "Nombre"                    { System.out.println("NOMBRE") /* return symbol(sym.NOMBRE) */; }
-    "Tipo"                      { System.out.println("TIPO") /* return symbol(sym.TIPO) */; }
-    "Funcion"                   { System.out.println("FUNCION") /* return symbol(sym.FUNCION) */; }
-    "Parametros"                { System.out.println("PARAMETROS") /* return symbol(sym.PARAMETROS) */; }
-    "Texto"                     { System.out.println("TEXTO_COMENTARIO") /* return symbol(sym.TEXTO_COMENTARIO) */; }
+    {Html_close}
+    {return symbol(sym.HTML_CLOSE); }
+    {H1_close}
+    {return symbol(sym.H1_CLOSE);}
+    {H2_close}
+    {return symbol(sym.H2_CLOSE);}
+    {Table_close}
+    {return symbol(sym.TABLE_CLOSE);}
+    {For_close}
+    {return symbol(sym.FOR_CLOSE);}
+    {Tr_close}
+    {return symbol(sym.TR_CLOSE);}
+    {Th_close}
+    {return symbol(sym.TH_CLOSE);}
+    {Td_close}
+    {return symbol(sym.TD_CLOSE);}    
+
+    {Iterador}
+    {return symbol(sym.ITERADOR);}
+    {Hasta}
+    {return symbol(sym.HASTA);}    
+
+    "String"                    { return symbol(sym.STRING); }
+    "Integer"                   { return symbol(sym.INTEGER); }
+    "RESULT"                    { return symbol(sym.RESULT); }
+    "Score"                     { return symbol(sym.SCORE); }
+    "Clases"                    { return symbol(sym.CLASES); }
+    "Metodos"                   { return symbol(sym.METODOS); }
+    "Variables"                 { return symbol(sym.VARIABLES); }
+    "Comentarios"               { return symbol(sym.COMENTARIOS); }
+    "Nombre"                    { return symbol(sym.NOMBRE); }
+    "Tipo"                      { return symbol(sym.TIPO); }
+    "Funcion"                   { return symbol(sym.FUNCION); }
+    "Parametros"                { return symbol(sym.PARAMETROS); }
+    "Texto"                     { return symbol(sym.TEXTO_COMENTARIO); }
     
     /* grouping */
-    "("                         { System.out.println("LPAREN") /* return symbol(sym.LPAREN) */; }
-    ")"                         { System.out.println("RPAREN") /* return symbol(sym.RPAREN) */; }
-    "["                         { System.out.println("LBRACKET") /* return symbol(sym.LBRACKET) */; }
-    "]"                         { System.out.println("RBRACKET") /* return symbol(sym.RBRACKET) */; }    
+    "("                         { return symbol(sym.LPAREN); }
+    ")"                         { return symbol(sym.RPAREN); }
+    "["                         { return symbol(sym.LBRACKET); }
+    "]"                         { return symbol(sym.RBRACKET); }    
     /* separators */
-    ";"                         { System.out.println("SEMICOLON") /* return symbol(sym.SEMICOLON) */; }
-    ","                         { System.out.println("COMMA") /* return symbol(sym.COMMA) */; }
-    "."                         { System.out.println("DOT") /* return symbol(sym.DOT) */; }
-    ":"                         { System.out.println("COLON") /* return symbol(sym.COLON) */; }
+    ";"                         { return symbol(sym.SEMICOLON); }
+    ","                         { return symbol(sym.COMMA); }
+    "."                         { return symbol(sym.DOT); }
+    ":"                         { return symbol(sym.COLON); }
   
     /* operators */
-    "="                         { System.out.println("EQ") /* return symbol(sym.EQ) */;}    
+    "="                         { return symbol(sym.EQ);}    
             
-    "+"                         { System.out.println("PLUS") /* return symbol(sym.PLUS) */; }
-    "-"                         { System.out.println("MINUS") /* return symbol(sym.MINUS) */; }
-    "*"                         { System.out.println("MULT") /* return symbol(sym.MULT) */; }
-    "/"                         { System.out.println("DIV") /* return symbol(sym.DIV) */; }        
+    "+"                         { return symbol(sym.PLUS); }
+    "-"                         { return symbol(sym.MINUS); }
+    "*"                         { return symbol(sym.MULT); }
+    "/"                         { return symbol(sym.DIV); }        
 
-    "$$"                        { System.out.println("DPESOS") /* return symbol(sym.DPESOS) */; }
-    ">"                         { System.out.println("GT") /* return symbol(sym.GT) */; }
-    "<"                         { System.out.println("LT") /* return symbol(sym.LT) */; }
+    "$$"                        { return symbol(sym.DPESOS); }
+    ">"                         { return symbol(sym.GT); }
+    //"<"                         { return symbol(sym.LT); }
         
   
   /* string literal */
   \"                         { yybegin(STRING); string.setLength(0); }
   
   /* Numbers */     
-  {Integer}                      { System.out.println("INTEGER_LITERAL: " + Integer.valueOf(yytext())) /* return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())) */; }
+  {Integer}                      { return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())); }
   //{Decimal}                      { return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); }
   /* comments */
-  {Comment}                      { /* Ignorar */ System.out.println("Comentario: " + yytext());}
+  {Comment}                      { /* Ignorar */}
 
   /* whitespace */
   {WhiteSpace}                   { /* ignore */ }
 
   /* identifiers */ 
-  {Identifier}                   { System.out.println("IDENTIFIER " + yytext()) /* return symbol(sym.IDENTIFIER, yytext()) */; }  
-  {Text}                         { System.out.println("TEXT " + yytext()) /* return symbol(sym.TEXT, yytext()) */; }  
+  {Identifier}                   { return symbol(sym.IDENTIFIER, yytext()); }  
+  {Text}                         { return symbol(sym.TEXT, yytext()); }  
 }
 
 <STRING> {
-    \"                             { yybegin(YYINITIAL); System.out.println("STRING_LITERAL :"  +string.toString()) /* return symbol(sym.STRING_LITERAL, string.toString()) */; }
+    \"                             { yybegin(YYINITIAL); return symbol(sym.STRING_LITERAL, string.toString()); }
     
     {StringCharacter}+             { string.append( yytext() ); }
     
@@ -187,11 +217,11 @@ Br = {b}{r}
     "\\\\"                         { string.append( '\\' ); }    
     
     /* error cases */
-    \\.                            { System.out.println("Illegal escape sequence \""+yytext()+"\""); }
-    {LineTerminator}               { System.out.println("Unterminated string at end of line"); }
+    \\.                            { ClientError.getError().log("Illegal escape sequence \""+yytext()+"\""); }
+    {LineTerminator}               { ClientError.getError().log("Unterminated string at end of line"); }
 }
 
 /* error fallback */
-[^]                              { System.out.println("Illegal character \""+yytext()+
+[^]                              { ClientError.getError().log("Illegal character \""+yytext()+
                                                               "\" at line "+yyline+", column "+yycolumn); }
-//<<EOF>>                          { System.out.println("EOF") /* return symbol(sym.EOF) */; }
+<<EOF>>                          { return symbol(sym.EOF); }

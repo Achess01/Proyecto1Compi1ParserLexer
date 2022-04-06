@@ -1,4 +1,7 @@
-
+package com.achess.client.copyParserLexer;
+import java.util.List;
+import java_cup.runtime.Symbol;
+import com.achess.client.error.ClientError;
 parser code  {: 	
   
     public CopyParser(CopyLexer lexer){
@@ -19,24 +22,28 @@ parser code  {:
 		}
         des = des.substring(0, des.length() - 3);
 
-        Error.getError().log("COPY:\n");
-		Error.getError().log("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");
-		if(count) Error.getError().log(des+"\n");
+        ClientError.getError().log("COPY:\n");
+		ClientError.getError().log("Error sintáctico ln:"+line+" col:"+column+ " " +lexeme + "\n");
+		if(count) ClientError.getError().log(des+"\n");
 	}
 
     public void report_fatal_error(String message, Object info) {
-        Error.getError().log("COPY:\n");
-		Error.getError().log("Message: " + message);
-		Error.getError().log("Info: " + info.toString());		
+        ClientError.getError().log("COPY:\n");
+		ClientError.getError().log("Message: " + message);
+		ClientError.getError().log("Info: " + info.toString());		
 	}
     
 :};
 
-terminal GT, LT;
-terminal HTML, H1, H2;
-terminal FOR, ITERADOR, HASTA;
-terminal TABLE, TR, TH, TD;
-terminal BR;
+terminal HTML_OPEN, H1_OPEN, H2_OPEN;
+terminal FOR_OPEN; 
+terminal TABLE_OPEN, TR_OPEN, TH_OPEN, TD_OPEN;
+terminal HTML_CLOSE, H1_CLOSE, H2_CLOSE;
+terminal FOR_CLOSE; 
+terminal TABLE_CLOSE, TR_CLOSE, TH_CLOSE, TD_CLOSE;
+terminal BR_OPEN;
+
+terminal ITERADOR, HASTA;
 
 terminal STRING, INTEGER;
 terminal INTEGER_LITERAL;
@@ -56,13 +63,13 @@ terminal EQ;
 terminal PLUS, MINUS, MULT, DIV;
 
 terminal DPESOS;
-terminal GT, LT;
+terminal GT;
 
 non terminal initialState;
 
-non terminal field_declarators;
 non terminal field_definitions_opt;
 non terminal field_definitions;
+non terminal field_definition;
 non terminal variable_declarators;
 non terminal variable_declarator;
 non terminal variable_assignment;
@@ -78,6 +85,7 @@ non terminal result_variables;
 non terminal class_variables;
 non terminal method_variables;
 non terminal var_variables;
+non terminal id_call;
 
 
 non terminal integer_value;
@@ -93,12 +101,23 @@ non terminal table_tag, table_body;
 non terminal tr_tag, tr_body;
 non terminal th_tag, th_body;
 non terminal td_tag, td_body;
+
+non terminal html_element_no_for_tag;
+
 non terminal for_tag, for_body;
+non terminal for_body_elements, for_body_element;
 non terminal for_table_tag, for_table_body;
+non terminal for_table_elements, for_table_element;
+non terminal for_tr_tag, for_tr_body;
+non terminal for_tr_elements, for_tr_element;
+
 non terminal br_tag;
 non terminal call_variable;
-non terminal html_element_no_for;
 
+non terminal table_elemets, table_element;
+non terminal tr_elements, tr_element;
+
+non terminal values_html;
 non terminal html_declarator, html_body;
 non terminal html_element;
 non terminal html_tag_open, html_tag_close;
@@ -109,6 +128,7 @@ non terminal tr_tag_open, tr_tag_close;
 non terminal th_tag_open, th_tag_close;
 non terminal td_tag_open, td_tag_close;
 non terminal for_tag_open, for_tag_close;
+non terminal br_tag_open;
 
 
 start with initialState;
@@ -121,8 +141,13 @@ field_definitions_opt ::=
                         | field_definitions
                         ;
 
-field_definitions ::= type variable_declarators SEMICOLON
-                   | variable_assignment SEMICOLON;
+field_definitions ::= field_definition
+                    | field_definitions field_definition
+                    ;
+
+field_definition ::= type variable_declarators SEMICOLON
+                   | variable_assignment SEMICOLON
+                   ;
 
 variable_assignment ::= IDENTIFIER EQ operation;
 
@@ -191,8 +216,8 @@ operation::= operation PLUS term
             |term
             ;
 
-term::= term TIMES factor                        
-        |term DIVISION factor                        
+term::= term MULT factor                        
+        |term DIV factor                        
         |factor                        
         ;
 
@@ -201,22 +226,24 @@ factor::= values
         | MINUS factor                        
         ;
 
-html_tag_open ::= LT HTML GT;
-html_tag_close ::= LT DIV HTML GT;
-h1_tag_open ::= LT H1 GT;
-h1_tag_close ::= LT DIV H1 GT;
-h2_tag_open ::= LT H2 GT;
-h2_tag_close ::= LT DIV H2 GT;
-table_tag_open ::= LT TABLE GT;
-table_tag_close ::= LT DIV TABLE GT;
-tr_tag_open ::= LT TR GT;
-tr_tag_close ::= LT DIV TR GT;
-th_tag_open ::= LT TH GT;
-th_tag_close ::= LT DIV TH GT;
-td_tag_open ::= LT TD GT;
-td_tag_close ::= LT DIV TD GT;
-for_tag_open ::= LT FOR ITERADOR COLON integer_value HASTA COLON integer_value GT;
-for_tag_close ::= LT DIV FOR GT;
+html_tag_open::= HTML_OPEN GT;
+html_tag_close ::= HTML_CLOSE GT;
+h1_tag_open::= H1_OPEN GT;
+h1_tag_close ::= H1_CLOSE GT;
+h2_tag_open::= H2_OPEN GT;
+h2_tag_close ::= H2_CLOSE GT;
+table_tag_open ::= TABLE_OPEN GT;
+table_tag_close ::= TABLE_CLOSE GT;
+tr_tag_open ::= TR_OPEN GT;
+tr_tag_close ::= TR_CLOSE GT;
+th_tag_open ::= TH_OPEN GT;
+th_tag_close ::= TH_CLOSE GT;
+td_tag_open ::= TD_OPEN GT;
+td_tag_close ::= TD_CLOSE GT;
+for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value HASTA COLON integer_value GT;
+for_tag_close ::= FOR_CLOSE GT;
+br_tag_open ::= BR_OPEN GT
+            ;
 
 html_declarator ::=  html_tag_open html_body html_tag_close
                     ;
@@ -228,20 +255,24 @@ values_html ::= IDENTIFIER
         | call_variable
         ;
 
-call_variable ::= DPESOS LPAREN IDENTIFIER RPAREN DPESOS;
+call_variable ::= DPESOS LPAREN id_call RPAREN DPESOS;
+
+id_call ::= IDENTIFIER
+        | access_result
+        ;
 
 html_body ::= html_element
             | html_body html_element;
 
-html_element ::= html_element_no_for
+html_element ::= html_element_no_for_tag
                 | for_tag
-                ;
+                | values_html
+                    ;
 
-html_element_no_for ::= h1_tag
+html_element_no_for_tag ::= h1_tag
                     | h2_tag
                     | table_tag                    
                     | br_tag
-                    | values_html
                     ;
             
 h1_tag ::= h1_tag_open h1_body h1_tag_close;
@@ -255,9 +286,86 @@ h2_tag ::= h2_tag_open h2_body h2_tag_close
 h2_body ::= values_html
             ;
 
-br_tag ::= LT BR GT;
+br_tag ::= br_tag_open;
 
 for_tag::= for_tag_open for_body for_tag_close;
 
-for_body ::= html_element_no_for
+for_body ::= for_body_elements
             ;
+
+for_body_elements ::= for_body_element
+                    | for_body_elements for_body_element
+                    ;
+
+for_body_element ::= html_element_no_for_tag
+                    | values_html
+                    ;
+
+table_tag ::= table_tag_open table_body table_tag_close
+            ;            
+
+table_body::= table_elemets
+            ;
+
+table_elemets ::= table_element
+            | table_elemets table_element
+            ;
+
+table_element ::= tr_tag
+                | for_table_tag
+                ;
+
+for_table_tag ::= for_tag_open for_table_body for_tag_close
+                    ;
+
+for_table_body ::= for_table_elements
+                    ;
+
+for_table_elements ::= for_table_element
+                    |   for_table_elements for_table_element
+                    ;
+
+for_table_element ::= tr_tag
+                    ;
+
+tr_tag ::= tr_tag_open tr_body tr_tag_close
+            ;
+
+tr_body ::= tr_elements
+        ;
+
+tr_elements ::= tr_element
+            | tr_elements tr_element
+            ;
+
+tr_element ::= th_tag
+            | td_tag
+            | for_tr_tag            
+            ;
+
+for_tr_tag ::= for_tag_open for_tr_body for_tag_close            
+            ;
+
+for_tr_body ::= for_tr_elements
+                ;
+
+for_tr_elements ::= for_tr_element
+                |   for_tr_elements for_tr_element
+                ;
+
+for_tr_element ::= td_tag
+                |  th_tag
+                ;
+
+th_tag ::= th_tag_open th_body th_tag_close
+            ;
+
+th_body ::= values_html
+            ;
+
+td_tag ::= td_tag_open td_body td_tag_close
+            ;
+
+td_body ::= values_html
+            ;
+            

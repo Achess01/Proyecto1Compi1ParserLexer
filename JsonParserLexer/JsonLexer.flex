@@ -1,5 +1,6 @@
 package com.achess.client.jsonParserLexer;
 import java_cup.runtime.Symbol;
+import com.achess.client.error.ClientError;
 %%
 %class JsonLexer
 %public 
@@ -90,11 +91,11 @@ StringCharacter = [^\r\n\"\\]
     "\\\\"                         { string.append( '\\' ); }    
     
     /* error cases */
-    \\.                            { System.out.println("Illegal escape sequence \""+yytext()+"\""); }
-    {LineTerminator}               { System.out.println("Unterminated string at end of line"); }
+    \\.                            { ClientError.getError().log("Illegal escape sequence \""+yytext()+"\""); }
+    {LineTerminator}               { ClientError.getError().log("Unterminated string at end of line"); }
 }
 
 /* error fallback */
-[^]                              { System.out.println("Illegal character \""+yytext()+
+[^]                              { ClientError.getError().log("Illegal character \""+yytext()+
                                                               "\" at line "+yyline+", column "+yycolumn); }
 <<EOF>>                          { return symbol(sym.EOF);  }
