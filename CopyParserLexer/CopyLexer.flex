@@ -187,7 +187,7 @@ Td_close = "</"{t}{d}
   \"                         { yybegin(STRING); string.setLength(0); }
   
   /* Numbers */     
-  {Integer}                      { return symbol(sym.INTEGER_LITERAL, Integer.valueOf(yytext())); }
+  {Integer}                      { return symbol(sym.INTEGER_LITERAL, yytext()); }
   //{Decimal}                      { return symbol(sym.FLOATING_POINT_LITERAL, new Double(yytext())); }
   /* comments */
   {Comment}                      { /* Ignorar */}

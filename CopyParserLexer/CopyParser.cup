@@ -2,6 +2,7 @@ package com.achess.client.copyParserLexer;
 import java.util.List;
 import java_cup.runtime.Symbol;
 import com.achess.client.error.ClientError;
+import com.achess.client.copy.*;
 parser code  {: 	
   
     public CopyParser(CopyLexer lexer){
@@ -46,7 +47,7 @@ terminal BR_OPEN;
 terminal ITERADOR, HASTA;
 
 terminal STRING, INTEGER;
-terminal INTEGER_LITERAL;
+terminal String INTEGER_LITERAL;
 terminal STRING_LITERAL;
 terminal IDENTIFIER;
 terminal TEXT;
