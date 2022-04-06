@@ -23,7 +23,6 @@ import com.achess.client.error.ClientError;
 
 /* main character classes */
 LineTerminator = \r|\n|\r\n
-InputCharacter = [^\r\n]
 
 WhiteSpace = {LineTerminator} | [ \t\f]
 
@@ -149,16 +148,16 @@ Td_close = "</"{t}{d}
     "String"                    { return symbol(sym.STRING); }
     "Integer"                   { return symbol(sym.INTEGER); }
     "RESULT"                    { return symbol(sym.RESULT); }
-    "Score"                     { return symbol(sym.SCORE); }
-    "Clases"                    { return symbol(sym.CLASES); }
-    "Metodos"                   { return symbol(sym.METODOS); }
-    "Variables"                 { return symbol(sym.VARIABLES); }
-    "Comentarios"               { return symbol(sym.COMENTARIOS); }
-    "Nombre"                    { return symbol(sym.NOMBRE); }
-    "Tipo"                      { return symbol(sym.TIPO); }
-    "Funcion"                   { return symbol(sym.FUNCION); }
-    "Parametros"                { return symbol(sym.PARAMETROS); }
-    "Texto"                     { return symbol(sym.TEXTO_COMENTARIO); }
+    "Score"                     { return symbol(sym.SCORE, yytext()); }
+    "Clases"                    { return symbol(sym.CLASES, yytext()); }
+    "Metodos"                   { return symbol(sym.METODOS, yytext()); }
+    "Variables"                 { return symbol(sym.VARIABLES, yytext()); }
+    "Comentarios"               { return symbol(sym.COMENTARIOS, yytext()); }
+    "Nombre"                    { return symbol(sym.NOMBRE, yytext()); }
+    "Tipo"                      { return symbol(sym.TIPO, yytext()); }
+    "Funcion"                   { return symbol(sym.FUNCION, yytext()); }
+    "Parametros"                { return symbol(sym.PARAMETROS, yytext()); }
+    "Texto"                     { return symbol(sym.TEXTO_COMENTARIO, yytext()); }
     
     /* grouping */
     "("                         { return symbol(sym.LPAREN); }

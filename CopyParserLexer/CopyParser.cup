@@ -73,6 +73,8 @@ non terminal field_definition;
 non terminal variable_declarators;
 non terminal variable_declarator;
 non terminal variable_assignment;
+non terminal name;
+non terminal reserved;
 
 non terminal access_result;
 non terminal access_score;
@@ -148,18 +150,36 @@ field_definitions ::= field_definition
 field_definition ::= type variable_declarators SEMICOLON
                    | variable_assignment SEMICOLON
                    ;
+                
+name ::= IDENTIFIER
+        | reserved
+        ;
+        
 
-variable_assignment ::= IDENTIFIER EQ operation;
+reserved ::= SCORE
+        | CLASES
+        | METODOS
+        | VARIABLES
+        | COMENTARIOS
+        | TIPO 
+        | FUNCION
+        | NOMBRE 
+        | PARAMETROS 
+        | TEXTO_COMENTARIO
+        ;
+
+
+variable_assignment ::= name EQ operation;
 
 variable_declarators ::= variable_declarator
                         | variable_declarators COMMA variable_declarator
                         ;
 
-variable_declarator ::= IDENTIFIER
+variable_declarator ::= name
                     | variable_assignment
                     ;
 
-integer_value ::= IDENTIFIER
+integer_value ::= name
             | INTEGER_LITERAL
             ;
 
@@ -205,7 +225,7 @@ type ::= STRING
         | INTEGER
         ;
 
-values ::= IDENTIFIER
+values ::= name
         | STRING_LITERAL
         | access_result
         | INTEGER_LITERAL
@@ -248,7 +268,7 @@ br_tag_open ::= BR_OPEN GT
 html_declarator ::=  html_tag_open html_body html_tag_close
                     ;
 
-values_html ::= IDENTIFIER
+values_html ::= name
         | STRING_LITERAL 
         | INTEGER_LITERAL
         | TEXT
@@ -257,7 +277,7 @@ values_html ::= IDENTIFIER
 
 call_variable ::= DPESOS LPAREN id_call RPAREN DPESOS;
 
-id_call ::= IDENTIFIER
+id_call ::= name
         | access_result
         ;
 
