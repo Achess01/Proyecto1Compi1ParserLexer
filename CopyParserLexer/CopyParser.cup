@@ -3,6 +3,7 @@ import java.util.List;
 import java_cup.runtime.Symbol;
 import com.achess.client.error.ClientError;
 import com.achess.client.copy.*;
+import java.util.ArrayList;
 parser code  {: 	
   
     public CopyParser(CopyLexer lexer){
@@ -48,12 +49,13 @@ terminal ITERADOR, HASTA;
 
 terminal STRING, INTEGER;
 terminal String INTEGER_LITERAL;
-terminal STRING_LITERAL;
-terminal IDENTIFIER;
-terminal TEXT;
+terminal String STRING_LITERAL;
+terminal String IDENTIFIER;
+terminal String TEXT;
 
-terminal RESULT, SCORE, CLASES, METODOS, VARIABLES, COMENTARIOS; 
-terminal TIPO, FUNCION ,NOMBRE, PARAMETROS, TEXTO_COMENTARIO;
+terminal RESULT;
+terminal String SCORE, CLASES, METODOS, VARIABLES, COMENTARIOS; 
+terminal String TIPO, FUNCION ,NOMBRE, PARAMETROS, TEXTO_COMENTARIO;
 
 terminal LPAREN, RPAREN;
 terminal LBRACKET, RBRACKET;
@@ -71,13 +73,13 @@ non terminal initialState;
 non terminal field_definitions_opt;
 non terminal field_definitions;
 non terminal field_definition;
-non terminal variable_declarators;
-non terminal variable_declarator;
-non terminal variable_assignment;
-non terminal name;
-non terminal reserved;
+non terminal ArrayList<CopyVariable> variable_declarators;
+non terminal CopyVariable variable_declarator;
+non terminal CopyVariable variable_assignment;
+non terminal String name;
+non terminal String reserved;
 
-non terminal access_result;
+non terminal Value access_result;
 non terminal access_score;
 non terminal access_variables;
 non terminal access_methods;
@@ -91,12 +93,12 @@ non terminal var_variables;
 non terminal id_call;
 
 
-non terminal integer_value;
+non terminal String integer_value;
 
-non terminal type;
-non terminal values;
+non terminal Integer type;
+non terminal Value values;
 
-non terminal operation, term, factor;
+non terminal Operation operation, term, factor;
 
 non terminal h1_tag, h1_body;
 non terminal h2_tag, h2_body;
@@ -148,36 +150,107 @@ field_definitions ::= field_definition
                     | field_definitions field_definition
                     ;
 
-field_definition ::= type variable_declarators SEMICOLON
-                   | variable_assignment SEMICOLON
+field_definition ::= type:type variable_declarators:arr SEMICOLON
+                {:
+                    arr.forEach(v -> {
+                            v.setType(type);
+                            if(v.op == null){
+                                ParseCopy.getCopy().addVariable(v);
+                            }else{
+                                ParseCopy.getCopy().addVariable(v, v.op);
+                            }
+                            
+                        });
+                :}
+                   | variable_assignment:v SEMICOLON
+                   {:
+                        ParseCopy.getCopy().reAssignVariable(v.getName(), v.op);
+                   :}
                    ;
                 
-name ::= IDENTIFIER
-        | reserved
+name ::= IDENTIFIER:st
+        {:
+            RESULT=st;
+        :}
+        | reserved:st
+        {:
+            RESULT=st;
+        :}
         ;
         
 
-reserved ::= SCORE
-        | CLASES
-        | METODOS
-        | VARIABLES
-        | COMENTARIOS
-        | TIPO 
-        | FUNCION
-        | NOMBRE 
-        | PARAMETROS 
-        | TEXTO_COMENTARIO
+reserved ::= SCORE:st
+        {:
+            RESULT=st;
+        :}
+        | CLASES:st
+        {:
+            RESULT=st;
+        :}
+        | METODOS:st
+        {:
+            RESULT=st;
+        :}
+        | VARIABLES:st
+        {:
+            RESULT=st;
+        :}
+        | COMENTARIOS:st
+        {:
+            RESULT=st;
+        :}
+        | TIPO:st
+        {:
+            RESULT=st;
+        :}
+        | FUNCION:st
+        {:
+            RESULT=st;
+        :}
+        | NOMBRE:st
+        {:
+            RESULT=st;
+        :}
+        | PARAMETROS:st
+        {:
+            RESULT=st;
+        :}
+        | TEXTO_COMENTARIO:st
+        {:
+            RESULT=st;
+        :}
         ;
 
 
-variable_assignment ::= name EQ operation;
-
-variable_declarators ::= variable_declarator
-                        | variable_declarators COMMA variable_declarator
+variable_assignment ::= name:name EQ operation:op
+                        {:
+                            CopyVariable v = new CopyVariable(name, 0, op);
+                            RESULT=v;
+                        :}
                         ;
 
-variable_declarator ::= name
-                    | variable_assignment
+variable_declarators ::= variable_declarator:v
+                        {:
+                            ArrayList<CopyVariable> arr = new ArrayList();
+                            arr.add(v);
+                            RESULT=arr;
+                        :}
+                        | variable_declarators:arr COMMA variable_declarator:v
+                        {:                            
+                            arr.add(v);
+                            RESULT=arr;
+                        :}
+                        ;
+
+variable_declarator ::= name:name
+                        {:
+                            CopyVariable v = new CopyVariable(name, 0);
+                            RESULT=v;
+                        :}
+                    | variable_assignment:v
+                    {:                        
+                        RESULT=v;
+                    :}
                     ;
 
 integer_value ::= name
@@ -223,28 +296,73 @@ access_comments ::= COMENTARIOS LBRACKET integer_value RBRACKET DOT TEXTO_COMENT
                     ;
 
 type ::= STRING
+        {:
+                RESULT=Value.STRING;
+        :}
         | INTEGER
+        {:
+                RESULT=Value.INTEGER;
+        :}
         ;
 
-values ::= name
-        | STRING_LITERAL
-        | access_result
-        | INTEGER_LITERAL
+values ::= STRING_LITERAL:st
+        {:
+            RESULT=new Value(st, Value.STRING);
+        :}
+        | access_result:val
+        {:
+            RESULT=val;
+        :}
+        | INTEGER_LITERAL:st
+        {:
+            RESULT=new Value(st, Value.INTEGER);
+        :}
         ;
 
-operation::= operation PLUS term 
-            |operation MINUS term  
-            |term
+operation ::= operation:opL PLUS:s term:opR
+            {:
+                RESULT=new Operation(Operation.SUMA, opL, opR, sleft);
+            :}
+            |operation:opL MINUS:s term:opR
+            {:
+                RESULT=new Operation(Operation.RESTA, opL, opR, sleft);
+            :}
+            |term:term
+            {:
+                RESULT=term;
+            :}
             ;
 
-term::= term MULT factor                        
-        |term DIV factor                        
-        |factor                        
+term::= term:opL MULT:s factor:opR
+            {:
+                RESULT=new Operation(Operation.MULTIPLICACION, opL, opR, sleft);
+            :}
+        |term:opL DIV:s factor:opR
+        {:
+            RESULT=new Operation(Operation.DIVISION, opL, opR, sleft);
+        :}
+        |factor:factor    
+        {:
+            RESULT=factor;
+        :}
         ;
 
-factor::= values                                          
-        |LPAREN operation RPAREN                        
-        | MINUS factor                        
+factor::= values:val
+        {:
+            RESULT = new Operation(val, valleft);
+        :}      
+        | name:name
+        {:
+            RESULT = new Operation(name, nameleft);
+        :}                         
+        |LPAREN operation:op RPAREN      
+        {:
+            RESULT=op;
+        :}                  
+        | MINUS:s factor:factor
+        {:
+            RESULT=new Operation(Operation.NEGACION, factor, null, sleft);
+        :}        
         ;
 
 html_tag_open::= HTML_OPEN GT;
