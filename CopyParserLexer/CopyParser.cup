@@ -1,7 +1,7 @@
 
 parser code  {: 	
   
-    public CopyParser(JsonLexer lexer){
+    public CopyParser(CopyLexer lexer){
         super(lexer);		
     }
 
@@ -32,4 +32,118 @@ parser code  {:
     
 :};
 
-terminal GREATER, LESS;
+terminal GT, LT;
+terminal HTML, H1, H2;
+terminal FOR, ITERADOR, HASTA;
+terminal TABLE, TR, TH, TD;
+terminal BR;
+
+terminal STRING, INTEGER;
+terminal INTEGER_LITERAL;
+terminal STRING_LITERAL;
+terminal IDENTIFIER;
+terminal TEXT;
+
+terminal RESULT, SCORE, CLASES, METODOS, VARIABLES, COMENTARIOS; 
+terminal TIPO, FUNCION ,NOMBRE, PARAMETROS, TEXTO_COMENTARIO;
+
+terminal LPAREN, RPAREN;
+terminal LBRACKET, RBRACKET;
+terminal SEMICOLON, COLON;
+terminal COMMA, DOT;
+
+terminal EQ;
+terminal PLUS, MINUS, MULT, DIV;
+
+terminal DPESOS;
+terminal GT, LT;
+
+non terminal initialState;
+
+non terminal field_declarators;
+non terminal field_declarators_opt;
+non terminal variable_declarators;
+non terminal variable_declarator;
+
+non terminal access_result;
+non terminal access_score;
+non terminal access_variables;
+non terminal access_methods;
+non terminal access_classes;
+non terminal access_comments;
+
+non terminal result_variables;
+non terminal class_variables;
+non terminal method_variables;
+non terminal var_variables;
+
+non terminal integer_value;
+
+non terminal type;
+
+non terminal html_declarator;
+
+
+start with initialState;
+
+
+initialState ::= field_declarators_opt html_declarator
+                ;
+
+field_declarators_opt ::= 
+                        | type variable_declarators SEMICOLON
+                        ;
+
+variable_declarators ::= variable_declarator
+                        | variable_declarators COMMA variable_declarator
+                        ;
+
+variable_declarator ::= IDENTIFIER
+                    | IDENTIFIER EQ expression                    
+                    ;
+
+integer_value ::= IDENTIFIER
+            | INTEGER_LITERAL
+            ;
+
+access_result ::= RESULT DOT result_variables;
+
+result_variables ::= access_score
+                | access_classes
+                | access_methods
+                | access_variables
+                | access_comments
+                ;
+
+
+access_score ::= SCORE
+                ;
+
+access_classes ::= CLASES LBRACKET integer_value RBRACKET DOT class_variables
+                    ;
+
+class_variables ::= NOMBRE
+                    ;
+
+access_methods ::= METODOS LBRACKET integer_value RBRACKET DOT method_variables
+                    ;
+
+method_variables ::= class_variables
+                    | TIPO
+                    | PARAMETROS
+                    ; 
+
+access_variables ::= VARIABLES LBRACKET integer_value RBRACKET DOT var_variables
+                    ;
+
+var_variables ::= class_variables
+                    | TIPO
+                    | FUNCION
+                    ;
+
+access_comments ::= COMENTARIOS LBRACKET integer_value RBRACKET DOT TEXTO_COMENTARIO
+                    ;
+
+type ::= STRING
+        | INTEGER
+        ;
