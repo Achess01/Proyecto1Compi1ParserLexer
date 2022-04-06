@@ -61,9 +61,11 @@ terminal GT, LT;
 non terminal initialState;
 
 non terminal field_declarators;
-non terminal field_declarators_opt;
+non terminal field_definitions_opt;
+non terminal field_definitions;
 non terminal variable_declarators;
 non terminal variable_declarator;
+non terminal variable_assignment;
 
 non terminal access_result;
 non terminal access_score;
@@ -77,9 +79,13 @@ non terminal class_variables;
 non terminal method_variables;
 non terminal var_variables;
 
+
 non terminal integer_value;
 
 non terminal type;
+non terminal values;
+
+non terminal operation, term, factor;
 
 non terminal html_declarator;
 
@@ -87,19 +93,24 @@ non terminal html_declarator;
 start with initialState;
 
 
-initialState ::= field_declarators_opt html_declarator
+initialState ::= field_definitions_opt html_declarator
                 ;
 
-field_declarators_opt ::= 
-                        | type variable_declarators SEMICOLON
+field_definitions_opt ::= 
+                        | field_definitions
                         ;
+
+field_definitions ::= type variable_declarators SEMICOLON
+                   | variable_assignment SEMICOLON;
+
+variable_assignment ::= IDENTIFIER EQ operation;
 
 variable_declarators ::= variable_declarator
                         | variable_declarators COMMA variable_declarator
                         ;
 
 variable_declarator ::= IDENTIFIER
-                    | IDENTIFIER EQ expression                    
+                    | variable_assignment
                     ;
 
 integer_value ::= IDENTIFIER
@@ -147,3 +158,59 @@ access_comments ::= COMENTARIOS LBRACKET integer_value RBRACKET DOT TEXTO_COMENT
 type ::= STRING
         | INTEGER
         ;
+
+values ::= IDENTIFIER
+        | STRING_LITERAL
+        | access_result
+        | INTEGER_LITERAL
+        ;
+
+operation::= operation PLUS term 
+            |operation MINUS term  
+            |term
+            ;
+
+term::= term TIMES factor                        
+        |term DIVISION factor                        
+        |factor                        
+        ;
+
+factor::= values                                          
+        |LPAREN operation RPAREN                        
+        | MINUS factor                        
+        ;
+
+
+html_declarator ::= 
+
+html_tag_open ::= LT HTML GT;
+
+html_tag_close ::= LT DIV HTML GT;
+
+h1_tag_open ::= LT H1 GT;
+
+h1_tag_close ::= LT DIV H1 GT;
+
+h2_tag_open ::= LT H2 GT;
+
+h2_tag_close ::= LT DIV H2 GT;
+
+table_tag_open ::= LT TABLE GT;
+
+table_tag_close ::= LT DIV TABLE GT;
+
+tr_tag_open ::= LT TR GT;
+
+tr_tag_close ::= LT DIV TR GT;
+
+th_tag_open ::= LT TH GT;
+
+th_tag_close ::= LT DIV TH GT;
+
+td_tag_open ::= LT TD GT;
+
+td_tag_close ::= LT DIV TD GT;
+
+for_tag_open ::= LT FOR GT;
+
+for_tag_close ::= LT DIV FOR GT;
