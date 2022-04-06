@@ -87,7 +87,28 @@ non terminal values;
 
 non terminal operation, term, factor;
 
-non terminal html_declarator;
+non terminal h1_tag, h1_body;
+non terminal h2_tag, h2_body;
+non terminal table_tag, table_body;
+non terminal tr_tag, tr_body;
+non terminal th_tag, th_body;
+non terminal td_tag, td_body;
+non terminal for_tag, for_body;
+non terminal for_table_tag, for_table_body;
+non terminal br_tag;
+non terminal call_variable;
+non terminal html_element_no_for;
+
+non terminal html_declarator, html_body;
+non terminal html_element;
+non terminal html_tag_open, html_tag_close;
+non terminal h1_tag_open, h1_tag_close;
+non terminal h2_tag_open, h2_tag_close;
+non terminal table_tag_open, table_tag_close;
+non terminal tr_tag_open, tr_tag_close;
+non terminal th_tag_open, th_tag_close;
+non terminal td_tag_open, td_tag_close;
+non terminal for_tag_open, for_tag_close;
 
 
 start with initialState;
@@ -180,37 +201,63 @@ factor::= values
         | MINUS factor                        
         ;
 
-
-html_declarator ::= 
-
 html_tag_open ::= LT HTML GT;
-
 html_tag_close ::= LT DIV HTML GT;
-
 h1_tag_open ::= LT H1 GT;
-
 h1_tag_close ::= LT DIV H1 GT;
-
 h2_tag_open ::= LT H2 GT;
-
 h2_tag_close ::= LT DIV H2 GT;
-
 table_tag_open ::= LT TABLE GT;
-
 table_tag_close ::= LT DIV TABLE GT;
-
 tr_tag_open ::= LT TR GT;
-
 tr_tag_close ::= LT DIV TR GT;
-
 th_tag_open ::= LT TH GT;
-
 th_tag_close ::= LT DIV TH GT;
-
 td_tag_open ::= LT TD GT;
-
 td_tag_close ::= LT DIV TD GT;
-
-for_tag_open ::= LT FOR GT;
-
+for_tag_open ::= LT FOR ITERADOR COLON integer_value HASTA COLON integer_value GT;
 for_tag_close ::= LT DIV FOR GT;
+
+html_declarator ::=  html_tag_open html_body html_tag_close
+                    ;
+
+values_html ::= IDENTIFIER
+        | STRING_LITERAL 
+        | INTEGER_LITERAL
+        | TEXT
+        | call_variable
+        ;
+
+call_variable ::= DPESOS LPAREN IDENTIFIER RPAREN DPESOS;
+
+html_body ::= html_element
+            | html_body html_element;
+
+html_element ::= html_element_no_for
+                | for_tag
+                ;
+
+html_element_no_for ::= h1_tag
+                    | h2_tag
+                    | table_tag                    
+                    | br_tag
+                    | values_html
+                    ;
+            
+h1_tag ::= h1_tag_open h1_body h1_tag_close;
+
+h1_body ::= values_html
+            ;
+
+h2_tag ::= h2_tag_open h2_body h2_tag_close
+            ;
+
+h2_body ::= values_html
+            ;
+
+br_tag ::= LT BR GT;
+
+for_tag::= for_tag_open for_body for_tag_close;
+
+for_body ::= html_element_no_for
+            ;

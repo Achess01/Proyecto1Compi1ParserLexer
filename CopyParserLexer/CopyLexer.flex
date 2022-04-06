@@ -168,7 +168,7 @@ Br = {b}{r}
 
   /* identifiers */ 
   {Identifier}                   { System.out.println("IDENTIFIER " + yytext()) /* return symbol(sym.IDENTIFIER, yytext()) */; }  
-  {Text}                   { System.out.println("TEXT " + yytext()) /* return symbol(sym.TEXT, yytext()) */; }  
+  {Text}                         { System.out.println("TEXT " + yytext()) /* return symbol(sym.TEXT, yytext()) */; }  
 }
 
 <STRING> {
