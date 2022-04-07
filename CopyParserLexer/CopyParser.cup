@@ -4,6 +4,7 @@ import java_cup.runtime.Symbol;
 import com.achess.client.error.ClientError;
 import com.achess.client.copy.*;
 import java.util.ArrayList;
+import com.achess.client.result.Result;
 parser code  {: 	
   
     public CopyParser(CopyLexer lexer){
@@ -86,7 +87,7 @@ non terminal Value access_methods;
 non terminal Value access_classes;
 non terminal Value access_comments;
 
-non terminal Integer result_variables;
+non terminal Value result_variables;
 non terminal Integer class_variables;
 non terminal Integer method_variables;
 non terminal Integer var_variables;
@@ -263,19 +264,19 @@ integer_value ::= name:st
                     ClientError.getError().log("COPY\n" + st + " debe ser entero ln:"+ stleft);                    
                 }
                 else{
-                    RESULT=v.getValue();
+                    RESULT=v.getValue().getIntegerValue();
                 }
             :}
             | INTEGER_LITERAL:st
             {:
-                RESULT=new Value(st, Value.INTEGER);
+                RESULT=Integer.valueOf(st);
             :}
             ;
 
 access_result ::= RESULT DOT result_variables:val
                 {:
                     if(val == null){
-                        val = new Val("", Value.ERROR);
+                        val = new Value("", Value.ERROR);
                     }
                     RESULT=val;
                 :}
@@ -485,7 +486,7 @@ th_tag_open ::= TH_OPEN GT;
 th_tag_close ::= TH_CLOSE GT;
 td_tag_open ::= TD_OPEN GT;
 td_tag_close ::= TD_CLOSE GT;
-for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer_value:index GT;
+for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer_value:index2 GT;
 for_tag_close ::= FOR_CLOSE GT;
 br_tag_open ::= BR_OPEN GT
             ;
