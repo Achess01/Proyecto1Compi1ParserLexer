@@ -502,9 +502,7 @@ br_tag_open ::= BR_OPEN GT
 
 html_declarator ::=  html_tag_open html_body:body html_tag_close
                     {:
-                        HtmlMain.getHtml().setElements(body);
-                        System.out.println("---------------");
-                        System.out.println(HtmlMain.getHtml().run());
+                        HtmlMain.getHtml().setElements(body);                       
                     :}
                     ;
 
