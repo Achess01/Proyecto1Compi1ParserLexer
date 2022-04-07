@@ -107,10 +107,12 @@ non terminal HtmlElement table_tag;
 non terminal ArrayList<HtmlElement> table_body;
 non terminal HtmlElement tr_tag;
 non terminal ArrayList<HtmlElement> tr_body;
-non terminal HtmlElement th_tag, th_body;
-non terminal HtmlElement td_tag, td_body;
+non terminal HtmlElement th_tag;
+non terminal NoTag th_body;
+non terminal HtmlElement td_tag;
+non terminal NoTag td_body;
 
-non terminal html_element_no_for_tag;
+non terminal HtmlElement html_element_no_for_tag;
 
 non terminal HtmlElement for_tag; 
 non terminal ArrayList<HtmlElement> for_body;
@@ -134,7 +136,7 @@ non terminal ArrayList<HtmlElement> tr_elements;
 non terminal HtmlElement tr_element;
 
 
-non terminal HtmlElement var_and_values;
+non terminal NoTag var_and_values;
 non terminal String values_html;
 non terminal html_declarator;
 non terminal ArrayList<HtmlElement> html_body;
@@ -487,6 +489,7 @@ for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer
                         ArrayList<String> arr= new ArrayList();
                         arr.add(index);
                         arr.add(index2);
+                        RESULT=arr;
                     }
                 :}
                 ;
@@ -500,6 +503,7 @@ br_tag_open ::= BR_OPEN GT
 html_declarator ::=  html_tag_open html_body:body html_tag_close
                     {:
                         HtmlMain.getHtml().setElements(body);
+                        System.out.println("---------------");
                         System.out.println(HtmlMain.getHtml().run());
                     :}
                     ;
@@ -611,7 +615,7 @@ h1_tag ::= h1_tag_open h1_body:h h1_tag_close
             ;
 
 h1_body ::= var_and_values:h
-            {:
+            {:                
                 RESULT=new H1Tag(h.getValue(), h.isIdentifier());
             :}
             ;
