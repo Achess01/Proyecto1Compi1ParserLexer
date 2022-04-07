@@ -3,6 +3,7 @@ import java.util.List;
 import java_cup.runtime.Symbol;
 import com.achess.client.error.ClientError;
 import com.achess.client.copy.*;
+import com.achess.client.html.*;
 import java.util.ArrayList;
 parser code  {: 	
   
@@ -100,31 +101,44 @@ non terminal Value values;
 
 non terminal Operation operation, term, factor;
 
-non terminal h1_tag, h1_body;
-non terminal h2_tag, h2_body;
-non terminal table_tag, table_body;
-non terminal tr_tag, tr_body;
-non terminal th_tag, th_body;
-non terminal td_tag, td_body;
+non terminal HtmlElement h1_tag; h1_body;
+non terminal HtmlElement h2_tag, h2_body;
+non terminal HtmlElement table_tag;
+non terminal ArrayList<HtmlElement> table_body;
+non terminal HtmlElement tr_tag;
+non terminal ArrayList<HtmlElement> tr_body;
+non terminal HtmlElement th_tag, th_body;
+non terminal HtmlElement td_tag, td_body;
 
 non terminal html_element_no_for_tag;
 
-non terminal for_tag, for_body;
-non terminal for_body_elements, for_body_element;
-non terminal for_table_tag, for_table_body;
-non terminal for_table_elements, for_table_element;
-non terminal for_tr_tag, for_tr_body;
-non terminal for_tr_elements, for_tr_element;
+non terminal HtmlElement for_tag; 
+non terminal ArrayList<HtmlElement> for_body;
+non terminal ArrayList<HtmlElement> for_body_elements;
+non terminal HtmlElement for_body_element;
+non terminal HtmlElement for_table_tag;
+non terminal ArrayList<HtmlElement> for_table_body;
+non terminal ArrayList<HtmlElement> for_table_elements;
+non terminal HtmlElement for_table_element;
+non terminal HtmlElement for_tr_tag;
+non terminal ArrayList<HtmlElement> for_tr_body;
+non terminal ArrayList<HtmlElement> for_tr_elements;
+non terminal HtmlElement for_tr_element;
 
-non terminal br_tag;
+non terminal HtmlElement br_tag;
 non terminal String call_variable;
 
-non terminal table_elemets, table_element;
-non terminal tr_elements, tr_element;
+non terminal ArrayList<HtmlElement> table_elemets;
+non terminal HtmlElement table_element;
+non terminal ArrayList<HtmlElement> tr_elements; 
+non terminal HtmlElement tr_element;
 
-non terminal values_html;
-non terminal html_declarator, html_body;
-non terminal html_element;
+
+non terminal HtmlElement var_and_values;
+non terminal String values_html;
+non terminal html_declarator;
+non terminal ArrayList<HtmlElement> html_body;
+non terminal HtmlElement html_element;
 non terminal html_tag_open, html_tag_close;
 non terminal h1_tag_open, h1_tag_close;
 non terminal h2_tag_open, h2_tag_close;
@@ -483,7 +497,11 @@ br_tag_open ::= BR_OPEN GT
 
 
 
-html_declarator ::=  html_tag_open html_body html_tag_close
+html_declarator ::=  html_tag_open html_body:body html_tag_close
+                    {:
+                        HtmlMain.getHtml().setElements(body);
+                        System.out.println(HtmlMain.getHtml().run());
+                    :}
                     ;
 
 values_html ::= name:st
@@ -501,12 +519,17 @@ values_html ::= name:st
         | TEXT:st
         {:
             RESULT=st;
-        :}
-        | call_variable:st
-        {:
-            RESULT=st;
-        :}
+        :}        
         ;
+
+var_and_values ::= values:val
+                {: 
+                    RESULT=new NoTag(val, false);
+                :}
+                | call_variable:st
+                {:
+                    RESULT=new NoTag(st, true);
+                :}
 
 call_variable ::= DPESOS LPAREN id_call:st RPAREN DPESOS
                     {: 
@@ -535,114 +558,286 @@ id_call ::= name:st
         :}
         ;
 
-html_body ::= html_element
-            | html_body html_element;
+html_body ::= html_element:h
+            {: 
+                ArrayList<HtmlElement> arr = new ArrayList();
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}
+            | html_body:arr html_element:h
+            {:
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}
+            ;
 
-html_element ::= html_element_no_for_tag
-                | for_tag                
-                | values_html:st
+html_element ::= html_element_no_for_tag:h
                 {:
-                    //add to html
+                    RESULT=h;
                 :}
-                    ;
+                | for_tag:h                
+                {:
+                    RESULT=h;
+                :}
+                | var_and_values:h
+                {:
+                    RESULT=h;
+                :}
+                ;
 
-html_element_no_for_tag ::= h1_tag
-                    | h2_tag
-                    | table_tag                    
-                    | br_tag
+html_element_no_for_tag ::= h1_tag:h
+                    {:
+                        RESULT=h;
+                    :}
+                    | h2_tag:h
+                    {:
+                        RESULT=h;
+                    :}
+                    | table_tag:h
+                    {:
+                        RESULT=h;
+                    :}
+                    | br_tag:h
+                    {:
+                        RESULT=h;
+                    :}
                     ;
             
-h1_tag ::= h1_tag_open h1_body h1_tag_close;
-
-h1_body ::= values_html
+h1_tag ::= h1_tag_open h1_body:h h1_tag_close
+            {:
+                RESULT=h;
+            :}
             ;
 
-h2_tag ::= h2_tag_open h2_body h2_tag_close
+h1_body ::= var_and_values:h
+            {:
+                RESULT=new H1Tag(h.getValue(), h.isIdentifier());
+            :}
             ;
 
-h2_body ::= values_html
+h2_tag ::= h2_tag_open h2_body:h h2_tag_close
+            {:
+                RESULT=h;
+            :}
+            ;
             ;
 
-br_tag ::= br_tag_open;
-
-for_tag::= for_tag_open for_body for_tag_close;
-
-for_body ::= for_body_elements
+h2_body ::= var_and_values:h
+            {:
+                RESULT=new H2Tag(h.getValue(), h.isIdentifier());
+            :}
             ;
 
-for_body_elements ::= for_body_element
-                    | for_body_elements for_body_element
+br_tag ::= br_tag_open
+            {:
+                RESULT=new BrTag();
+            :}
+            ;
+
+for_tag::= for_tag_open:arr for_body:arr2 for_tag_close
+            {:
+                if(arr != null){
+                    RESULT=new ForTag(arr2, arr.get(0), arr.get(1));
+                }
+            :}
+            ;
+
+for_body ::= for_body_elements:arr
+            {: 
+                RESULT=arr;
+            :}
+            ;
+
+for_body_elements ::= for_body_element:h
+                    {:
+                        ArrayList<HtmlElement> arr = new ArrayList();
+                        if(h != null) arr.add(h);
+                        RESULT=arr;
+                    :}
+                    | for_body_elements:arr for_body_element:h
+                    {:                      
+                        if(h != null) arr.add(h);
+                        RESULT=arr;
+                    :}                    
                     ;
 
-for_body_element ::= html_element_no_for_tag
-                    | values_html
+for_body_element ::= html_element_no_for_tag:h
+                    {:
+                        RESULT=h;
+                    :}
+                    | var_and_values:h
+                    {:
+                        RESULT=h;
+                    :}                    
                     ;
 
-table_tag ::= table_tag_open table_body table_tag_close
+table_tag ::= table_tag_open table_body:arr table_tag_close
+            {:
+                RESULT=new TableTag(arr);
+            :}
             ;            
 
-table_body::= table_elemets
+table_body::= table_elemets:arr
+            {:
+                RESULT=arr;
+            :}
             ;
 
-table_elemets ::= table_element
-            | table_elemets table_element
+table_elemets ::= table_element:h
+            {:
+                ArrayList<HtmlElement> arr = new ArrayList();
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}
+            | table_elemets:arr table_element:h
+            {:                
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}            
             ;
 
-table_element ::= tr_tag
-                | for_table_tag
+table_element ::= tr_tag:h
+                {:                  
+                    RESULT=h;
+                :}
+                | for_table_tag:h
+                {:                
+                    RESULT=h;
+                :}
                 ;
 
-for_table_tag ::= for_tag_open for_table_body for_tag_close
+for_table_tag ::= for_tag_open:arr for_table_body:arr2 for_tag_close
+                    {:
+                        if(arr != null){
+                            RESULT=new ForTag(arr2, arr.get(0), arr.get(1));
+                        }
+                    :}                    
                     ;
 
-for_table_body ::= for_table_elements
+for_table_body ::= for_table_elements:arr
+                    {: 
+                        RESULT=arr;                        
+                    :}
                     ;
 
-for_table_elements ::= for_table_element
-                    |   for_table_elements for_table_element
+for_table_elements ::= for_table_element:h
+                    {:
+                        ArrayList<HtmlElement> arr = new ArrayList();
+                        if(h != null) arr.add(h);
+                        RESULT=arr;
+                    :}
+                    |   for_table_elements:arr for_table_element:h
+                    {:                        
+                        if(h != null) arr.add(h);
+                        RESULT=arr;
+                    :}
                     ;
 
-for_table_element ::= tr_tag
+for_table_element ::= tr_tag:h
+                    {:                        
+                        RESULT=h;
+                    :}
                     ;
 
-tr_tag ::= tr_tag_open tr_body tr_tag_close
+tr_tag ::= tr_tag_open tr_body:arr tr_tag_close
+            {: 
+                if(arr != null){
+                    RESULT=new TrTag(arr);
+                }
+            :}
             ;
 
-tr_body ::= tr_elements
+tr_body ::= tr_elements:arr
+        {: 
+            RESULT=arr;
+        :}
         ;
 
-tr_elements ::= tr_element
-            | tr_elements tr_element
+tr_elements ::= tr_element:h
+            {:
+                ArrayList<HtmlElement> arr = new ArrayList();
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}
+            | tr_elements:arr tr_element:h
+            {:              
+                if(h != null) arr.add(h);
+                RESULT=arr;
+            :}        
             ;
 
-tr_element ::= th_tag
-            | td_tag
-            | for_tr_tag            
+tr_element ::= th_tag:h
+            {:
+                RESULT=h;
+            :}
+            | td_tag:h
+            {:
+                RESULT=h;
+            :}
+            | for_tr_tag:h
+            {:
+                RESULT=h;
+            :}
             ;
 
-for_tr_tag ::= for_tag_open for_tr_body for_tag_close            
+for_tr_tag ::= for_tag_open:arr for_tr_body:arr2 for_tag_close
+            {:
+                if(arr != null){
+                    RESULT=new ForTag(arr2, arr.get(0), arr.get(1));
+                }
+            :}  
             ;
 
-for_tr_body ::= for_tr_elements
+for_tr_body ::= for_tr_elements:arr
+                {:
+                    RESULT=arr;
+                :}
                 ;
 
-for_tr_elements ::= for_tr_element
-                |   for_tr_elements for_tr_element
+for_tr_elements ::= for_tr_element:h
+                {:
+                    ArrayList<HtmlElement> arr = new ArrayList();
+                    if(h != null) arr.add(h);
+                    RESULT=arr;
+                :}
+                |   for_tr_elements:arr for_tr_element:h
+                {:                  
+                    if(h != null) arr.add(h);
+                    RESULT=arr;
+                :}                
                 ;
 
-for_tr_element ::= td_tag
-                |  th_tag
+for_tr_element ::= td_tag:h
+                {: 
+                    RESULT=h;
+                :}
+                |  th_tag:h
+                {: 
+                    RESULT=h;
+                :}                
                 ;
 
-th_tag ::= th_tag_open th_body th_tag_close
+th_tag ::= th_tag_open th_body:h th_tag_close
+            {:
+                RESULT=new ThTag(h.getValue(), h.isIdentifier());
+            :}
             ;
 
-th_body ::= values_html
+th_body ::= var_and_values:h
+            {:
+                RESULT=h;
+            :}
             ;
 
-td_tag ::= td_tag_open td_body td_tag_close
+td_tag ::= td_tag_open td_body:h td_tag_close
+            {:
+                RESULT=new TdTag(h.getValue(), h.isIdentifier());
+            :}
             ;
 
-td_body ::= values_html
+td_body ::= var_and_values:h
+            {:
+                RESULT=h;
+            :}
             ;
             
