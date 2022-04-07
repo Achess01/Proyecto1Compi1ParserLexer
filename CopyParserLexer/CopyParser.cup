@@ -80,21 +80,21 @@ non terminal CopyVariable variable_assignment;
 non terminal String name;
 non terminal String reserved;
 
-non terminal Value access_result;
-non terminal Value access_score;
-non terminal Value access_variables;
-non terminal Value access_methods;
-non terminal Value access_classes;
-non terminal Value access_comments;
+non terminal String access_result;
+non terminal String access_score;
+non terminal String access_variables;
+non terminal String access_methods;
+non terminal String access_classes;
+non terminal String access_comments;
 
-non terminal Value result_variables;
+non terminal String result_variables;
 non terminal Integer class_variables;
 non terminal Integer method_variables;
 non terminal Integer var_variables;
-non terminal id_call;
+non terminal String id_call;
 
 
-non terminal Integer integer_value;
+non terminal String integer_value;
 
 non terminal Integer type;
 non terminal Value values;
@@ -118,7 +118,7 @@ non terminal for_tr_tag, for_tr_body;
 non terminal for_tr_elements, for_tr_element;
 
 non terminal br_tag;
-non terminal call_variable;
+non terminal String call_variable;
 
 non terminal table_elemets, table_element;
 non terminal tr_elements, tr_element;
@@ -133,7 +133,8 @@ non terminal table_tag_open, table_tag_close;
 non terminal tr_tag_open, tr_tag_close;
 non terminal th_tag_open, th_tag_close;
 non terminal td_tag_open, td_tag_close;
-non terminal for_tag_open, for_tag_close;
+non terminal ArrayList<String>for_tag_open;
+non terminal for_tag_close;
 non terminal br_tag_open;
 
 
@@ -256,31 +257,33 @@ variable_declarator ::= name:name
 
 integer_value ::= name:st
             {:
-                CopyVariable v = ParseCopy.getCopy().getVariable(st);
-                RESULT=null;  
+                CopyVariable v = ParseCopy.getCopy().getVariable(st);                
                 if(v == null) ClientError.getError().log("COPY\nLa variable " + st + " no existe ln:"+ stleft);
                 else if(v.getValue() == null) ClientError.getError().log("COPY\n" + st + " No tiene ningún valor ln:"+ stleft);
                 else if(v.getValue().getType() != Value.INTEGER){
                     ClientError.getError().log("COPY\n" + st + " debe ser entero ln:"+ stleft);                    
                 }
                 else{
-                    RESULT=v.getValue().getIntegerValue();
-                }
+                    RESULT=st;
+                }                
             :}
             | INTEGER_LITERAL:st
             {:
-                RESULT=Integer.valueOf(st);
+                RESULT=st;
             :}
             ;
 
 access_result ::= RESULT DOT result_variables:val
-                {:
-                    if(val == null){
-                        val = new Value("", Value.ERROR);
+                {:      
+                    if(val != null){
+                        RESULT=val;
                     }
-                    RESULT=val;
+                    else{
+                        RESULT="";
+                    }
                 :}
                 ;
+
 result_variables ::= access_score:val
                 {:
                     RESULT=val;
@@ -306,20 +309,17 @@ result_variables ::= access_score:val
 
 access_score ::= SCORE
                 {:
-                    RESULT=new Value(Result.getResult().getScore(), Value.STRING);
+                    String name = "~result~score";                    
+                    RESULT=name;
                 :}
                 ;
 
-access_classes ::= CLASES LBRACKET integer_value:index RBRACKET DOT class_variables
-                    {:
+access_classes ::= CLASES LBRACKET integer_value:index RBRACKET DOT class_variables:param
+                    {:      
                         if(index != null){
-                            RESULT=null;
-                            String val = Result.getResult().getClasses(index);
-                            if(val != null) RESULT=new Value(val , Value.STRING);  
-                            else{
-                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
-                            }                          
-                        }
+                            String name = "~result~clases-"+param+"-,"+index;
+                            RESULT=name;  
+                        }                        
                     :}
                     ;
 
@@ -331,20 +331,10 @@ class_variables ::= NOMBRE
 
 access_methods ::= METODOS LBRACKET integer_value:index RBRACKET DOT method_variables:param
                     {:
-                        if(index != null){
-                            RESULT=null;
-                            String val = Result.getResult().getMethods(index, param);
-                            if(val != null){
-                                if(param == 2){
-                                    RESULT=new Value(val , Value.INTEGER); 
-                                }else{
-                                    RESULT=new Value(val , Value.STRING); 
-                                }                            
-                            } 
-                            else{
-                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
-                            }    
-                        }
+                        if(index != null){                                                       
+                            String name = "~result~metodos-"+param+"-,"+index;                                
+                            RESULT=name;                                                       
+                        }                                                     
                     :}
                     ;
 
@@ -364,13 +354,9 @@ method_variables ::= class_variables:n
 
 access_variables ::= VARIABLES LBRACKET integer_value:index RBRACKET DOT var_variables:param
                     {:
-                        if(index != null){
-                            RESULT=null;
-                            String val = Result.getResult().getVariables(index, param);
-                            if(val != null) RESULT=new Value(val , Value.INTEGER); 
-                            else{
-                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
-                            }    
+                        if(index != null){                            
+                            String name = "~result~variables-"+param+"-,"+index;                                
+                            RESULT=name;                                                             
                         }
                     :}
                     ;
@@ -391,14 +377,10 @@ var_variables ::= class_variables:n
 
 access_comments ::= COMENTARIOS LBRACKET integer_value:index RBRACKET DOT TEXTO_COMENTARIO
                     {:
-                        if(index != null){
-                            RESULT=null;
-                            String val = Result.getResult().getComments(index);
-                            if(val != null) RESULT=new Value(val , Value.STRING);  
-                            else{
-                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
-                            }                          
-                        }
+                        if(index != null){                           
+                            String name = "~result~comentarios-0-,"+index;                                
+                            RESULT=name;                        
+                        }                            
                     :}
                     ;
 
@@ -415,10 +397,6 @@ type ::= STRING
 values ::= STRING_LITERAL:st
         {:
             RESULT=new Value(st, Value.STRING);
-        :}
-        | access_result:val
-        {:
-            RESULT=val;
         :}
         | INTEGER_LITERAL:st
         {:
@@ -461,7 +439,11 @@ factor::= values:val
         | name:name
         {:
             RESULT = new Operation(name, nameleft);
-        :}                         
+        :}      
+        | access_result:name     
+        {:
+            RESULT = new Operation(name, nameleft, true);
+        :}      
         |LPAREN operation:op RPAREN      
         {:
             RESULT=op;
@@ -486,33 +468,83 @@ th_tag_open ::= TH_OPEN GT;
 th_tag_close ::= TH_CLOSE GT;
 td_tag_open ::= TD_OPEN GT;
 td_tag_close ::= TD_CLOSE GT;
-for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer_value:index2 GT;
+for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer_value:index2 GT
+                {: 
+                    if(index != null && index2 != null){
+                        ArrayList<String> arr= new ArrayList();
+                        arr.add(index);
+                        arr.add(index2);
+                    }
+                :}
+                ;
+
 for_tag_close ::= FOR_CLOSE GT;
 br_tag_open ::= BR_OPEN GT
             ;
 
+
+
 html_declarator ::=  html_tag_open html_body html_tag_close
                     ;
 
-values_html ::= name
-        | STRING_LITERAL 
-        | INTEGER_LITERAL
-        | TEXT
-        | call_variable
+values_html ::= name:st
+        {:
+            RESULT=st;
+        :}
+        | STRING_LITERAL:st 
+        {:
+            RESULT=st;
+        :}
+        | INTEGER_LITERAL:st
+        {:
+            RESULT=st;
+        :}
+        | TEXT:st
+        {:
+            RESULT=st;
+        :}
+        | call_variable:st
+        {:
+            RESULT=st;
+        :}
         ;
 
-call_variable ::= DPESOS LPAREN id_call RPAREN DPESOS;
+call_variable ::= DPESOS LPAREN id_call:st RPAREN DPESOS
+                    {: 
+                        RESULT=st;
+                    :}
+                    ;
+                
 
-id_call ::= name
-        | access_result
+id_call ::= name:st
+        {:
+            /* RESULT="";
+            CopyVariable variable = ParseCopy.getCopy().getVariable(st);
+            if(variable == null){
+                ClientError.getError().log("COPY\nLa variable no está definida ln:" + stleft);
+            }
+            else if(variable.getValue() == null){
+                ClientError.getError().log("COPY\nLa variable no tiene ningún valor ln:" + stleft);
+            }else{
+                RESULT=variable.getValue().getValue();
+            } */
+            RESULT=st;
+        :}
+        | access_result:val
+        {:
+            RESULT=val;
+        :}
         ;
 
 html_body ::= html_element
             | html_body html_element;
 
 html_element ::= html_element_no_for_tag
-                | for_tag
-                | values_html
+                | for_tag                
+                | values_html:st
+                {:
+                    //add to html
+                :}
                     ;
 
 html_element_no_for_tag ::= h1_tag
