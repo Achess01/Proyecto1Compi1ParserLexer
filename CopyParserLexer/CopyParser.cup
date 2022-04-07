@@ -80,20 +80,20 @@ non terminal String name;
 non terminal String reserved;
 
 non terminal Value access_result;
-non terminal access_score;
-non terminal access_variables;
-non terminal access_methods;
-non terminal access_classes;
-non terminal access_comments;
+non terminal Value access_score;
+non terminal Value access_variables;
+non terminal Value access_methods;
+non terminal Value access_classes;
+non terminal Value access_comments;
 
-non terminal result_variables;
-non terminal class_variables;
-non terminal method_variables;
-non terminal var_variables;
+non terminal Integer result_variables;
+non terminal Integer class_variables;
+non terminal Integer method_variables;
+non terminal Integer var_variables;
 non terminal id_call;
 
 
-non terminal String integer_value;
+non terminal Integer integer_value;
 
 non terminal Integer type;
 non terminal Value values;
@@ -253,46 +253,152 @@ variable_declarator ::= name:name
                     :}
                     ;
 
-integer_value ::= name
-            | INTEGER_LITERAL
+integer_value ::= name:st
+            {:
+                CopyVariable v = ParseCopy.getCopy().getVariable(st);
+                RESULT=null;  
+                if(v == null) ClientError.getError().log("COPY\nLa variable " + st + " no existe ln:"+ stleft);
+                else if(v.getValue() == null) ClientError.getError().log("COPY\n" + st + " No tiene ningún valor ln:"+ stleft);
+                else if(v.getValue().getType() != Value.INTEGER){
+                    ClientError.getError().log("COPY\n" + st + " debe ser entero ln:"+ stleft);                    
+                }
+                else{
+                    RESULT=v.getValue();
+                }
+            :}
+            | INTEGER_LITERAL:st
+            {:
+                RESULT=new Value(st, Value.INTEGER);
+            :}
             ;
 
-access_result ::= RESULT DOT result_variables;
-
-result_variables ::= access_score
-                | access_classes
-                | access_methods
-                | access_variables
-                | access_comments
+access_result ::= RESULT DOT result_variables:val
+                {:
+                    if(val == null){
+                        val = new Val("", Value.ERROR);
+                    }
+                    RESULT=val;
+                :}
+                ;
+result_variables ::= access_score:val
+                {:
+                    RESULT=val;
+                :}
+                | access_classes:val
+                {:
+                    RESULT=val;
+                :}
+                | access_methods:val
+                {:
+                    RESULT=val;
+                :}
+                | access_variables:val
+                {:
+                    RESULT=val;
+                :}
+                | access_comments:val
+                {:
+                    RESULT=val;
+                :}
                 ;
 
 
 access_score ::= SCORE
+                {:
+                    RESULT=new Value(Result.getResult().getScore(), Value.STRING);
+                :}
                 ;
 
-access_classes ::= CLASES LBRACKET integer_value RBRACKET DOT class_variables
+access_classes ::= CLASES LBRACKET integer_value:index RBRACKET DOT class_variables
+                    {:
+                        if(index != null){
+                            RESULT=null;
+                            String val = Result.getResult().getClasses(index);
+                            if(val != null) RESULT=new Value(val , Value.STRING);  
+                            else{
+                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
+                            }                          
+                        }
+                    :}
                     ;
 
 class_variables ::= NOMBRE
+                    {:
+                        RESULT = 0;
+                    :}
                     ;
 
-access_methods ::= METODOS LBRACKET integer_value RBRACKET DOT method_variables
+access_methods ::= METODOS LBRACKET integer_value:index RBRACKET DOT method_variables:param
+                    {:
+                        if(index != null){
+                            RESULT=null;
+                            String val = Result.getResult().getMethods(index, param);
+                            if(val != null){
+                                if(param == 2){
+                                    RESULT=new Value(val , Value.INTEGER); 
+                                }else{
+                                    RESULT=new Value(val , Value.STRING); 
+                                }                            
+                            } 
+                            else{
+                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
+                            }    
+                        }
+                    :}
                     ;
 
-method_variables ::= class_variables
+method_variables ::= class_variables:n
+                    {: 
+                        RESULT=n;
+                    :}
                     | TIPO
+                    {: 
+                        RESULT=1;
+                    :}
                     | PARAMETROS
+                    {: 
+                        RESULT=2;
+                    :}
                     ; 
 
-access_variables ::= VARIABLES LBRACKET integer_value RBRACKET DOT var_variables
+access_variables ::= VARIABLES LBRACKET integer_value:index RBRACKET DOT var_variables:param
+                    {:
+                        if(index != null){
+                            RESULT=null;
+                            String val = Result.getResult().getVariables(index, param);
+                            if(val != null) RESULT=new Value(val , Value.INTEGER); 
+                            else{
+                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
+                            }    
+                        }
+                    :}
                     ;
 
-var_variables ::= class_variables
+var_variables ::= class_variables:n
+                    {:
+                        RESULT=n;
+                    :}
                     | TIPO
+                    {: 
+                        RESULT=1;
+                    :}
                     | FUNCION
+                    {:
+                        RESULT=2; 
+                    :}
                     ;
 
-access_comments ::= COMENTARIOS LBRACKET integer_value RBRACKET DOT TEXTO_COMENTARIO
+access_comments ::= COMENTARIOS LBRACKET integer_value:index RBRACKET DOT TEXTO_COMENTARIO
+                    {:
+                        if(index != null){
+                            RESULT=null;
+                            String val = Result.getResult().getComments(index);
+                            if(val != null) RESULT=new Value(val , Value.STRING);  
+                            else{
+                                ClientError.getError().log("COPY\n"+"Valor fuera de los límites ln:"+ indexleft);
+                            }                          
+                        }
+                    :}
                     ;
 
 type ::= STRING
@@ -379,7 +485,7 @@ th_tag_open ::= TH_OPEN GT;
 th_tag_close ::= TH_CLOSE GT;
 td_tag_open ::= TD_OPEN GT;
 td_tag_close ::= TD_CLOSE GT;
-for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value HASTA COLON integer_value GT;
+for_tag_open ::= FOR_OPEN ITERADOR COLON integer_value:index HASTA COLON integer_value:index GT;
 for_tag_close ::= FOR_CLOSE GT;
 br_tag_open ::= BR_OPEN GT
             ;
