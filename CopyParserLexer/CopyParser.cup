@@ -101,7 +101,7 @@ non terminal Value values;
 
 non terminal Operation operation, term, factor;
 
-non terminal HtmlElement h1_tag; h1_body;
+non terminal HtmlElement h1_tag, h1_body;
 non terminal HtmlElement h2_tag, h2_body;
 non terminal HtmlElement table_tag;
 non terminal ArrayList<HtmlElement> table_body;
@@ -522,7 +522,7 @@ values_html ::= name:st
         :}        
         ;
 
-var_and_values ::= values:val
+var_and_values ::= values_html:val
                 {: 
                     RESULT=new NoTag(val, false);
                 :}
@@ -530,6 +530,7 @@ var_and_values ::= values:val
                 {:
                     RESULT=new NoTag(st, true);
                 :}
+                ;
 
 call_variable ::= DPESOS LPAREN id_call:st RPAREN DPESOS
                     {: 
@@ -618,8 +619,7 @@ h1_body ::= var_and_values:h
 h2_tag ::= h2_tag_open h2_body:h h2_tag_close
             {:
                 RESULT=h;
-            :}
-            ;
+            :}            
             ;
 
 h2_body ::= var_and_values:h
