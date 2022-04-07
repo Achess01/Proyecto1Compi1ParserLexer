@@ -4,7 +4,6 @@ import java_cup.runtime.Symbol;
 import com.achess.client.error.ClientError;
 import com.achess.client.copy.*;
 import java.util.ArrayList;
-import com.achess.client.result.Result;
 parser code  {: 	
   
     public CopyParser(CopyLexer lexer){
